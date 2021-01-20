@@ -2,7 +2,7 @@
 # Modified i La Selva 19-Januari-04  20:19
 
 from PIL import Image, ImageTk
-import Tkinter as tk
+import tkinter as tk
 import argparse
 import time
 import datetime
@@ -38,7 +38,15 @@ class Application:
     def __init__(self, output_path = "./"):
         """ Initialize application which uses OpenCV + Tkinter. It displays
             a video stream in a Tkinter window and stores current snapshot on disk """
-        self.vs = cv2.VideoCapture(0) # capture video frames, 0 is your default video camera
+        self.curCam = 0
+        self.vs0 = cv2.VideoCapture(0) # capture video frames, 0 is your default video camera
+        self.vs1 = cv2.VideoCapture(2) # capture video frames, 0 is your default video camera
+        self.fourcc = cv2.VideoWriter_fourcc(*'XVID')
+        self.out0FileName = "CAM0-" + str(time.strftime("%Y-%m-%d %H_%M")) + '.avi'
+        self.out1FileName = "CAM1-" + str(time.strftime("%Y-%m-%d %H_%M")) + '.avi'
+        self.out0 = cv2.VideoWriter(self.out0FileName, self.fourcc, 33.0, (640,480))
+        self.out1 = cv2.VideoWriter(self.out1FileName, self.fourcc, 33.0, (640,480))
+        
         self.output_path = output_path  # store output path
         self.current_image = None  # current image from the camera
         self.root = tk.Tk()  # initialize root window
@@ -61,9 +69,9 @@ class Application:
         self.botShoot2.grid(row=10, column=20,columnspan=6)
         self.botShoot2.configure(command=self.picam)        
 
-        self.botShoot1= tk.Button(self.root,width=10, font=('arial', 14, 'normal'),  text="CV2-SHOOT" ,anchor="w")
-        self.botShoot1.grid(row=10, column=26,columnspan=5)
-        self.botShoot1.configure(command=self.snapshot)
+        self.switchBut= tk.Button(self.root,width=10, font=('arial', 14, 'normal'),  text="SWITCH" ,anchor="w")
+        self.switchBut.grid(row=10, column=26,columnspan=5)
+        self.switchBut.configure(command=self.switchCam)
 
         
         self.botQuit = tk.Button(self.root,width=6,font=('arial narrow', 14, 'normal'), text="CLOSE", activebackground="#00dfdf")
@@ -75,19 +83,26 @@ class Application:
     def video_loop(self):
         global test
         """ Get frame from the video stream and show it in Tkinter """
-        ok, frame = self.vs.read()  # read frame from video stream
-        if ok:  # frame captured without any errors
-            cv2image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGBA)  # convert colors from BGR to RGBA
+        ok0, frame0 = self.vs0.read()  # read frame from video stream
+        ok1, frame1 = self.vs1.read()  # read frame from video stream
+        shownFrame = frame0 if self.curCam == 0 else frame1 
+        shownOk = ok0 if self.curCam == 0 else ok1
+        if ok0:  # frame captured without any errors
+            self.out0.write(frame0)
+        if ok1:
+            self.out1.write(frame1)
+        if shownOk:
+            cv2image = cv2.cvtColor(shownFrame, cv2.COLOR_BGR2RGBA)  # convert colors from BGR to RGBA
             self.current_image = Image.fromarray(cv2image)  # convert image for PIL
             imgtk = ImageTk.PhotoImage(image=self.current_image)  # convert image for tkinter
             test = cv2image
             self.panel.imgtk = imgtk  # anchor imgtk so it does not be deleted by garbage-collector
             self.panel.config(image=imgtk)  # show the image
+
         self.root.after(30, self.video_loop)  # call the same function after 30 milliseconds
 
-    def snapshot(self):
-        imageName = str(time.strftime("%Y-%m-%d %H_%M")) + '.jpg'
-        cv2.imwrite(imageName,test)
+    def switchCam(self):
+        self.curCam = 0 if self.curCam == 1 else 1
 
     def picam(self):
         self.vs.release()
@@ -96,7 +111,8 @@ class Application:
         
     def destructor(self):
         self.root.destroy()
-        self.vs.release()  # release web camera
+        self.vs1.release()  # release web camera
+        self.vs2.release()  # release web camera
         cv2.destroyAllWindows()  # it is not mandatory in this application
 
 # construct the argument parse and parse the arguments
