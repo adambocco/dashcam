@@ -57,6 +57,7 @@ class AudioRecorder():
 
         if self.open == True:
             self.open = False
+            time.sleep(1)
             self.stream.stop_stream()
             self.stream.close()
             self.audio.terminate()
@@ -81,7 +82,7 @@ class Application:
         """ Initialize application which uses OpenCV + Tkinter. It displays
             a video stream in a Tkinter window and stores current snapshot on disk """
 
-        
+        self.showVideo = True
         self.recording0 = False
         self.recording1 = False
         self.frame_counts0 = 1
@@ -96,6 +97,7 @@ class Application:
         self.vs0 = cv2.VideoCapture(0)
         # capture video frames, 0 is your default video camera
         self.vs1 = cv2.VideoCapture(2)
+        self.vs1.set(cv2.CAP_PROP_BRIGHTNESS, 60)
         self.fourcc = cv2.VideoWriter_fourcc(*"MJPG")
         self.out0FileName = None
         self.out1FileName = None
@@ -134,13 +136,17 @@ class Application:
         self.botQuit.grid(row=10, column=10)
         self.botQuit.configure(command=self.destructor)
 
-        self.toggleRecordBut0 = tk.Button(self.root, width=6, text="Record 2",fg="black")
+        self.toggleRecordBut0 = tk.Button(self.root, width=6, text="Record 0",fg="black")
         self.toggleRecordBut0.grid(row=10, column=16)
         self.toggleRecordBut0.configure(command=lambda:self.toggleRecord(0))
 
         self.toggleRecordBut1 = tk.Button(self.root, width=6, text="Record 1",fg="black")
         self.toggleRecordBut1.grid(row=10, column=22)
         self.toggleRecordBut1.configure(command= lambda:self.toggleRecord(1))
+
+        self.toggleShowVideoBut = tk.Button(self.root, width=6, text="Show")
+        self.toggleShowVideoBut.grid(row=10, column=28)
+        self.toggleShowVideoBut.configure(command=self.toggleShowVideo)
 
         self.video_loop()
 
@@ -158,11 +164,10 @@ class Application:
         if ok1 and self.recording1:
             self.frame_counts1 += 1
             self.out1.write(frame1)
-        if shownOk:
+        if self.showVideo and shownOk:
             # convert colors from BGR to RGBA
             cv2image = cv2.cvtColor(shownFrame, cv2.COLOR_BGR2RGBA)
-            self.current_image = Image.fromarray(
-                cv2image)  # convert image for PIL
+            self.current_image = Image.fromarray(cv2image) 
             # convert image for tkinter
             imgtk = ImageTk.PhotoImage(image=self.current_image)
             test = cv2image
@@ -170,7 +175,10 @@ class Application:
             self.panel.config(image=imgtk)  # show the image
 
         # call the same function after 30 milliseconds
-        self.root.after(30, self.video_loop)
+        self.root.after(50, self.video_loop)
+
+    def toggleShowVideo(self):
+        self.showVideo = not self.showVideo
 
     def switchCam(self):
         self.curCam = 0 if self.curCam == 1 else 1
@@ -181,16 +189,18 @@ class Application:
             if (self.recording0):
                 self.recording0 = False
                 audio_thread.stop()
+                while threading.active_count() > 1:
+                    time.sleep(1)
                 self.out0.release()
-                self.frame_counts0
                 self.end_time0 = time.time()
-                self.recordAVMergeInfo()
+                self.recordAVMergeInfo(self.out0FileName, self.frame_counts0, self.start_time0, self.end_time0)
+                self.frame_counts0 = 1
                 self.toggleRecordBut0.config(text="Record 0", fg="black")
                 
             else:
                 start_audio_recording("DASH0Audio-"+datetimeStamp)
                 self.start_time0 = time.time()
-                self.out0FileName = "DASH0Video-"+datetime.stamp+".avi"
+                self.out0FileName = "DASH0Video-"+datetimeStamp+".avi"
                 self.out0 = cv2.VideoWriter(self.out0FileName, self.fourcc, 10, (640, 480))
                 self.toggleRecordBut0.config(text="Recording 0", fg="red")
                 time.sleep(0.5)
@@ -198,14 +208,12 @@ class Application:
         elif cam==1:
             if (self.recording1):
                 self.recording1 = False
-                audio_thread.stop()
                 self.out1.release()
-                self.frame_counts1
                 self.end_time1 = time.time()
-                self.recordAVMergeInfo()
+                self.recordAVMergeInfo(self.out1FileName, self.frame_counts1, self.start_time1, self.end_time1)
+                self.frame_counts1 = 1
                 self.toggleRecordBut1.config(text="Record 1", fg="black")
             else:
-                start_audio_recording("DASH1Audio-"+datetimeStamp)
                 self.start_time1 = time.time()
                 self.out1FileName = "DASH1Video-"+datetimeStamp+".avi"
                 self.out1 = cv2.VideoWriter(self.out1FileName, self.fourcc, 10, (640, 480))
@@ -213,16 +221,21 @@ class Application:
                 time.sleep(0.5)
                 self.recording1 = True
 
-    def recordAVMergeInfo(self):
-        pass
-        # TODO: log fps to file to merge A/V later
+    def recordAVMergeInfo(self, filename, framecount, start, end):
+        t = end-start
+        fps = framecount/t
+        with open('avmergelog.txt', 'a') as log:
+            log.write(f"{filename},{fps},{t}\n")
 
     def destructor(self):
-        audio_thread.stop()
-        while threading.active_count() > 1:
-            time.sleep(1)
-        stop_AVrecording(self.out0FileName, self.out0SaveName, self.start_time0, self.frame_counts0)
-        stop_AVrecording(self.out1FileName, self.out1SaveName, self.start_time1, self.frame_counts1)
+        try:
+            audio_thread.stop()
+            while threading.active_count() > 1:
+                time.sleep(1)
+        except NameError:
+            print("No audio thread started")
+        # stop_AVrecording(self.out0FileName, self.out0SaveName, self.start_time0, self.frame_counts0)
+        # stop_AVrecording(self.out1FileName, self.out1SaveName, self.start_time1, self.frame_counts1)
         self.root.destroy()
         self.vs0.release()  # release web camera
         self.vs1.release()  # release web camera
@@ -289,6 +302,5 @@ def file_manager(filenames):
 if __name__ == "__main__":
     filenames = ["DASH0temp.avi", "DASH1temp.avi", "DASH0.avi", "DASH1.avi"]
     file_manager(filenames)
-    start_audio_recording()
     pba = Application()
     pba.root.mainloop()
