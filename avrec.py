@@ -61,7 +61,7 @@ class AudioRecorder():
             self.stream.stop_stream()
             self.stream.close()
             self.audio.terminate()
-
+            time.sleep(1)
             waveFile = wave.open(self.audio_filename, 'wb')
             waveFile.setnchannels(self.channels)
             waveFile.setsampwidth(self.audio.get_sample_size(self.format))
@@ -190,7 +190,7 @@ class Application:
                 self.recording0 = False
                 audio_thread.stop()
                 while threading.active_count() > 1:
-                    time.sleep(1)
+                    time.sleep(0.5)
                 self.out0.release()
                 self.end_time0 = time.time()
                 self.recordAVMergeInfo(self.out0FileName, self.frame_counts0, self.start_time0, self.end_time0)
