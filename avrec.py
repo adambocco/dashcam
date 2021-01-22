@@ -96,7 +96,7 @@ class Application:
         # capture video frames, 0 is your default video camera
         self.vs0 = cv2.VideoCapture(0)
         # capture video frames, 0 is your default video camera
-        self.vs1 = cv2.VideoCapture(2)
+        self.vs1 = cv2.VideoCapture(1)
         self.vs1.set(cv2.CAP_PROP_BRIGHTNESS, 60)
         self.fourcc = cv2.VideoWriter_fourcc(*"MJPG")
         self.out0FileName = None
@@ -110,8 +110,8 @@ class Application:
         self.root = tk.Tk()  # initialize root window
         # set de default grey color to use in labels background
         defaultbg = self.root.cget('bg')
-        w = 650  # width for the Tk root
-        h = 550  # height for the Tk root
+        w = 480  # width for the Tk root
+        h = 260  # height for the Tk root
         self.root .resizable(0, 0)
         ws = self.root .winfo_screenwidth()  # width of the screen
         hs = self.root .winfo_screenheight()  # height of the screen
@@ -167,7 +167,8 @@ class Application:
         if self.showVideo and shownOk:
             # convert colors from BGR to RGBA
             cv2image = cv2.cvtColor(shownFrame, cv2.COLOR_BGR2RGBA)
-            self.current_image = Image.fromarray(cv2image) 
+            self.current_image = Image.fromarray(cv2image)
+            self.current_image = self.current_image.resize((480,200), Image.ANTIALIAS) 
             # convert image for tkinter
             imgtk = ImageTk.PhotoImage(image=self.current_image)
             test = cv2image
