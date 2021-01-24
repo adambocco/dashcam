@@ -283,26 +283,7 @@ def find_camera_indices():
             valid_cams.append(i)
     return valid_cams
 
-            
-def file_manager(filenames):
-    local_path = os.getcwd()
-
-    if os.path.exists(str(local_path) + "/temp_audio.wav"):
-        os.remove(str(local_path) + "/temp_audio.wav")
-
-    if os.path.exists(str(local_path) + "/temp_video.avi"):
-        os.remove(str(local_path) + "/temp_video.avi")
-
-    if os.path.exists(str(local_path) + "/temp_video2.avi"):
-        os.remove(str(local_path) + "/temp_video2.avi")
-
-    for filename in filenames:
-        if os.path.exists(str(local_path) + "/" + filename + ".avi"):
-            os.remove(str(local_path) + "/" + filename + ".avi")
-
 
 if __name__ == "__main__":
-    filenames = ["DASH0temp.avi", "DASH1temp.avi", "DASH0.avi", "DASH1.avi"]
-    file_manager(filenames)
     pba = Application()
     pba.root.mainloop()
