@@ -2,10 +2,12 @@ import subprocess
 import os
 from os import listdir, getcwd
 from os.path import isfile, join, dirname
-mypath = getcwd()
-onlyfiles = [f for f in listdir(mypath) if isfile(join(mypath, f))]
 
+mypath = getcwd()
+file_manager()
+onlyfiles = [f for f in listdir(mypath) if isfile(join(mypath, f))]
 logArr = []
+
 with open('avmergelog.txt', 'r') as log:
     for line in log:
         logArr.append(line[:-2].split(','))
@@ -29,13 +31,13 @@ print("\nAudio files: \n", audio_files)
 
 avpairs = []
 
-for video_file in video_files:
+# Join matching video and audio files
+for video_file in video_files: 
     pair = []
     for audio_file in audio_files:
         video_timestamp = video_file.split('-')[1:]
         #remove .avi
         video_timestamp[-1] = video_timestamp[-1][:2]
-        
         audio_timestamp = audio_file.split('-')[1:]
         #remove .wav
         audio_timestamp[-1] = audio_timestamp[-1][:2]
@@ -45,6 +47,7 @@ for video_file in video_files:
 
 for pair in avpairs:
     for entry in logArr:
+        print("ENTRY: ",entry)
         if entry[0] == pair[1]:
             pair.append(entry[1:])
 print("\nAV Pairs:\n",avpairs)
@@ -71,3 +74,9 @@ for log in avpairs:
     os.remove(str(mypath) + "/"+audio_filename)
     os.remove(str(mypath) + "/"+video_filename)
     print("Replaced "+audio_filename+" and "+video_filename+" with: \nNEW FILE: "+merged_filename)
+    
+    
+    
+def file_manager():
+    if os.path.exists(str(mypath) + "/temp_video2.avi"):
+        os.remove(str(mypath) + "/temp_video2.avi")
