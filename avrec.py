@@ -21,6 +21,11 @@ if not os.path.exists('/dev/video0'):
     p = subprocess.Popen(rpistr, shell=True, preexec_fn=os.setsid)
     time.sleep(1)
 
+BG = "black"
+BUTTON_BG = "#eeffee"
+BUTTON_ACTIVE_BG="#ccddff"
+BUTTON_FONT = ("Helvetica", 17, "bold")
+
 class AudioRecorder():
 
     # Audio class based on pyAudio and Wave
@@ -113,11 +118,10 @@ class Application:
         self.fullScreenState = False
         self.root.bind("<F11>", self.toggleFullScreen)
         self.root.bind("<Escape>", self.quitFullScreen)
-        defaultbg = self.root.cget('bg')
         # These are compatible with 3.5inch 480, 320 display
         w = 480  # width for the Tk root
         h = 320  # height for the Tk root
-        self.root .resizable(0, 0)
+        self.root.resizable(0, 0)
         ws = self.root .winfo_screenwidth()  # width of the screen
         hs = self.root .winfo_screenheight()  # height of the screen
         x = (ws/2) - (w/2)
@@ -126,33 +130,29 @@ class Application:
         # set window title
         self.root.title("DASHCAM")
         self.root.protocol('WM_DELETE_WINDOW', self.destructor)
+        self.root.config(bg=BG)
 
-        self.panel = tk.Label(self.root)  # initialize image panel
+        self.panel = tk.Label(self.root, bg=BG)  # initialize image panel
         self.panel.grid(row=0, rowspan=10, column=8,
-                        columnspan=25, padx=0, pady=0)
+                        columnspan=25, padx=0, pady=4)
 
-        self.switchBut = tk.Button(self.root, width=10,height=2, font=(
-            'arial', 14, 'normal'),  text="SWITCH", anchor="w")
+        self.switchBut = tk.Button(self.root, font=BUTTON_FONT,activebackground=BUTTON_ACTIVE_BG,  text="REAR", anchor="w", bg=BUTTON_BG)
         self.switchBut.grid(row=10, column=4, columnspan=5)
         self.switchBut.configure(command=self.switchCam)
 
-        self.botQuit = tk.Button(self.root, width=6,height=2, font=(
-            'arial narrow', 14, 'normal'), text="CLOSE", activebackground="#00dfdf")
+        self.botQuit = tk.Button(self.root, font=BUTTON_FONT, text="CLOSE", activebackground=BUTTON_ACTIVE_BG, bg=BUTTON_BG)
         self.botQuit.grid(row=10, column=10)
         self.botQuit.configure(command=self.destructor)
 
-        self.toggleRecordBut0 = tk.Button(self.root,font=(
-            'arial narrow', 14, 'normal'), width=6,height=2, text="REC 0",fg="black", activebackground="#00dfdf")
+        self.toggleRecordBut0 = tk.Button(self.root,font=BUTTON_FONT, text="REC 0",fg="black", activebackground=BUTTON_ACTIVE_BG, bg=BUTTON_BG)
         self.toggleRecordBut0.grid(row=10, column=16)
         self.toggleRecordBut0.configure(command=lambda:self.toggleRecord(0))
 
-        self.toggleRecordBut1 = tk.Button(self.root,font=(
-            'arial narrow', 14, 'normal'), width=6,height=2, text="REC 1",fg="black", activebackground="#00dfdf")
+        self.toggleRecordBut1 = tk.Button(self.root,font=BUTTON_FONT, text="REC 1",fg="black", activebackground=BUTTON_ACTIVE_BG, bg=BUTTON_BG)
         self.toggleRecordBut1.grid(row=10, column=22)
         self.toggleRecordBut1.configure(command= lambda:self.toggleRecord(1))
 
-        self.toggleShowVideoBut = tk.Button(self.root,font=(
-            'arial narrow', 14, 'normal'), width=6,height=2, text="HIDE", activebackground="#00dfdf")
+        self.toggleShowVideoBut = tk.Button(self.root,font=BUTTON_FONT, text="HIDE", activebackground=BUTTON_ACTIVE_BG, bg=BUTTON_BG)
         self.toggleShowVideoBut.grid(row=10, column=28)
         self.toggleShowVideoBut.configure(command=self.toggleShowVideo)
 
@@ -190,10 +190,9 @@ class Application:
             imgtk = ImageTk.PhotoImage(image=self.current_image)
             test = cv2image
             self.panel.imgtk = imgtk  # anchor imgtk so it does not be deleted by garbage-collector
-            self.panel.config(image=imgtk)  # show the image
+            self.panel.config(image=imgtk, bg=BG)  # show the image
         else:
-            self.panel.config(image="",text=self.defaultScreenText,font=(
-            'arial',86, 'bold'))
+            self.panel.config(image="",text=self.defaultScreenText, bg="black")
 
         # call the same function after {self.loopInterval} milliseconds
         self.root.after(self.loopInterval, self.video_loop)
@@ -206,7 +205,12 @@ class Application:
             self.toggleShowVideoBut.configure(text="SHOW")
 
     def switchCam(self):
-        self.curCam = 0 if self.curCam == 1 else 1
+        if self.curCam == 1:
+            self.curCam = 0
+            self.switchBut.config(text="FRNT")
+        else:
+            self.curCam = 1
+            self.switchBut.config(text="REAR")
 
     def toggleRecord(self,cam):
         datetimeStamp = datetime.now().strftime("%d-%m-%Y-%H-%M")

@@ -3,6 +3,11 @@ import os
 from os import listdir, getcwd
 from os.path import isfile, join, dirname
 
+def file_manager():
+    if os.path.exists(str(mypath) + "/temp_video2.avi"):
+        os.remove(str(mypath) + "/temp_video2.avi")
+
+
 mypath = getcwd()
 file_manager()
 onlyfiles = [f for f in listdir(mypath) if isfile(join(mypath, f))]
@@ -77,6 +82,3 @@ for log in avpairs:
     
     
     
-def file_manager():
-    if os.path.exists(str(mypath) + "/temp_video2.avi"):
-        os.remove(str(mypath) + "/temp_video2.avi")
