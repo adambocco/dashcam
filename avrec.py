@@ -13,6 +13,7 @@ import re
 import urllib
 import RPi.GPIO as GPIO
 import picamera
+import imutils
 from datetime import datetime
 
 # Necessary command for opencv to use CSI connected camera
@@ -114,8 +115,9 @@ class Application:
         self.out0 = None
         self.out1 = None
         
-        # SPECIFIC TO MY SETUP
-        self.vs1.set(cv2.CAP_PROP_BRIGHTNESS, 60)
+        self.vs0.set(cv2.CAP_PROP_BRIGHTNESS,70)
+        
+        self.vs1.set(cv2.CAP_PROP_BRIGHTNESS, 70)
 
         self.current_image = None  # current image from the camera
         self.root = tk.Tk()  # initialize root window
@@ -138,30 +140,31 @@ class Application:
         self.root.config(bg=BG)
 
         self.panel = tk.Label(self.root, bg=BG)  # initialize image panel
-        self.panel.grid(row=0, rowspan=10, column=8,
-                        columnspan=25, padx=0, pady=4)
+        self.panel.grid(row=0, rowspan=12, column=1)
 
-        self.switchBut = tk.Button(self.root, font=BUTTON_FONT,activebackground=BUTTON_ACTIVE_BG,  text="REAR", anchor="w", bg=BUTTON_BG)
-        self.switchBut.grid(row=10, column=4, columnspan=5)
-        self.switchBut.configure(command=self.switchCam)
-
-        self.botQuit = tk.Button(self.root, font=BUTTON_FONT, text="CLOSE", activebackground=BUTTON_ACTIVE_BG, bg=BUTTON_BG)
-        self.botQuit.grid(row=10, column=10)
+        self.botQuit = tk.Button(self.root, font=BUTTON_FONT, text="EXIT", bg="#ffafaf", activebackground=BUTTON_ACTIVE_BG,height=3)
+        self.botQuit.grid(row=0, column=0)
         self.botQuit.configure(command=self.destructor)
 
-        self.toggleRecordBut0 = tk.Button(self.root,font=BUTTON_FONT, text="REC 0",fg="black", activebackground=BUTTON_ACTIVE_BG, bg=BUTTON_BG)
-        self.toggleRecordBut0.grid(row=10, column=16)
+        self.switchBut = tk.Button(self.root, font=BUTTON_FONT,activebackground=BUTTON_ACTIVE_BG,  text="REAR", anchor="w", bg=BUTTON_BG,height=3)
+        self.switchBut.grid(row=1, column=0)
+        self.switchBut.configure(command=self.switchCam)
+
+        self.toggleRecordBut0 = tk.Button(self.root,font=BUTTON_FONT, text="REC 0",fg="black", activebackground=BUTTON_ACTIVE_BG, bg=BUTTON_BG,height=3)
+        self.toggleRecordBut0.grid(row=2, column=0)
         self.toggleRecordBut0.configure(command=lambda:self.toggleRecord(0))
 
-        self.toggleRecordBut1 = tk.Button(self.root,font=BUTTON_FONT, text="REC 1",fg="black", activebackground=BUTTON_ACTIVE_BG, bg=BUTTON_BG)
-        self.toggleRecordBut1.grid(row=10, column=22)
+        self.toggleRecordBut1 = tk.Button(self.root,font=BUTTON_FONT, text="REC 1",fg="black", activebackground=BUTTON_ACTIVE_BG, bg=BUTTON_BG,height=3)
+        self.toggleRecordBut1.grid(row=3, column=0)
         self.toggleRecordBut1.configure(command= lambda:self.toggleRecord(1))
 
-        self.toggleShowVideoBut = tk.Button(self.root,font=BUTTON_FONT, text="HIDE", activebackground=BUTTON_ACTIVE_BG, bg=BUTTON_BG)
-        self.toggleShowVideoBut.grid(row=10, column=28)
+        self.toggleShowVideoBut = tk.Button(self.root,font=BUTTON_FONT, text="HIDE", activebackground=BUTTON_ACTIVE_BG, bg=BUTTON_BG,height=3)
+        self.toggleShowVideoBut.grid(row=4, column=0)
         self.toggleShowVideoBut.configure(command=self.toggleShowVideo)
 
-        self.video_loop()
+        # self.video_loop()
+        self.thr = threading.Thread(target=self.video_loop, args=())
+        self.thr.start()
         
         
     def toggleFullScreen(self, event):
@@ -173,33 +176,32 @@ class Application:
         self.root.attributes("-fullscreen", self.fullScreenState)
 
     def video_loop(self):
-        global test
-        """ Get frame from the video stream and show it in Tkinter """
+        while True:
+            """ Get frame from the video stream and show it in Tkinter """
 
-        ok0, frame0 = self.vs0.read()  # read frame from video stream
-        ok1, frame1 = self.vs1.read()  # read frame from video stream
-        shownFrame = frame0 if self.curCam == 0 else frame1
-        shownOk = ok0 if self.curCam == 0 else ok1
-        if ok0 and self.recording0:  # frame captured without any errors
-            self.frame_counts0 += 1
-            self.out0.write(frame0)
-        if ok1 and self.recording1:
-            self.frame_counts1 += 1
-            self.out1.write(frame1)
-        if self.showVideo and shownOk:
-            # convert colors from BGR to RGBA
-            cv2image = cv2.cvtColor(shownFrame, cv2.COLOR_BGR2RGBA)
-            self.current_image = Image.fromarray(cv2image)
-            self.current_image = self.current_image.resize((480,260), Image.ANTIALIAS) 
-            # convert image for tkinter
-            imgtk = ImageTk.PhotoImage(image=self.current_image)
-            test = cv2image
-            self.panel.imgtk = imgtk  # anchor imgtk so it does not be deleted by garbage-collector
-            self.panel.config(image=imgtk, bg=BG)  # show the image
+            ok0, frame0 = self.vs0.read()  # read frame from video stream
+            ok1, frame1 = self.vs1.read()  # read frame from video stream
+            shownFrame = frame0 if self.curCam == 0 else frame1
+            shownOk = ok0 if self.curCam == 0 else ok1
+            if ok0 and self.recording0:  # frame captured without any errors
+                self.frame_counts0 += 1
+                self.out0.write(frame0)
+            if ok1 and self.recording1:
+                self.frame_counts1 += 1
+                self.out1.write(frame1)
+            if self.showVideo and shownOk:
+                # convert colors from BGR to RGBA
+                cv2image = cv2.cvtColor(shownFrame, cv2.COLOR_BGR2RGBA)
+                cv2image = imutils.resize(cv2image, height=320)
 
+                # convert image for tkinter
+                imgtk = ImageTk.PhotoImage(image=Image.fromarray(cv2image))
+                self.panel.config(image=imgtk, bg=BG)  # show the image
+                self.panel.imgtk = imgtk  # anchor imgtk so it does not be deleted by garbage-collector
 
+        
         # call the same function after {self.loopInterval} milliseconds
-        self.root.after(self.loopInterval, self.video_loop)
+        # self.root.after(self.loopInterval, self.video_loop)
 
     def toggleShowVideo(self):
         self.showVideo = not self.showVideo
