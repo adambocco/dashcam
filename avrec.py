@@ -26,7 +26,7 @@ BG = "black"
 BUTTON_BG = "#eeffee"
 BUTTON_ACTIVE_BG="#ccddff"
 BUTTON_FONT = ("Helvetica", 17, "bold")
-BTN_HEIGHT=1
+BTN_HEIGHT=2
 
 class AudioRecorder():
 
