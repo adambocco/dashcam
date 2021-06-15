@@ -26,6 +26,7 @@ BG = "black"
 BUTTON_BG = "#eeffee"
 BUTTON_ACTIVE_BG="#ccddff"
 BUTTON_FONT = ("Helvetica", 17, "bold")
+BTN_HEIGHT=1
 
 class AudioRecorder():
 
@@ -142,23 +143,23 @@ class Application:
         self.panel = tk.Label(self.root, bg=BG)  # initialize image panel
         self.panel.grid(row=0, rowspan=12, column=1)
 
-        self.botQuit = tk.Button(self.root, font=BUTTON_FONT, text="EXIT", bg="#ffafaf", activebackground=BUTTON_ACTIVE_BG,height=3)
+        self.botQuit = tk.Button(self.root, font=BUTTON_FONT, text="EXIT", bg="#ffafaf", activebackground=BUTTON_ACTIVE_BG,height=BTN_HEIGHT)
         self.botQuit.grid(row=0, column=0)
         self.botQuit.configure(command=self.destructor)
 
-        self.switchBut = tk.Button(self.root, font=BUTTON_FONT,activebackground=BUTTON_ACTIVE_BG,  text="REAR", anchor="w", bg=BUTTON_BG,height=3)
+        self.switchBut = tk.Button(self.root, font=BUTTON_FONT,activebackground=BUTTON_ACTIVE_BG,  text="REAR", anchor="w", bg=BUTTON_BG,height=BTN_HEIGHT)
         self.switchBut.grid(row=1, column=0)
         self.switchBut.configure(command=self.switchCam)
 
-        self.toggleRecordBut0 = tk.Button(self.root,font=BUTTON_FONT, text="REC 0",fg="black", activebackground=BUTTON_ACTIVE_BG, bg=BUTTON_BG,height=3)
+        self.toggleRecordBut0 = tk.Button(self.root,font=BUTTON_FONT, text="REC 0",fg="black", activebackground=BUTTON_ACTIVE_BG, bg=BUTTON_BG,height=BTN_HEIGHT)
         self.toggleRecordBut0.grid(row=2, column=0)
         self.toggleRecordBut0.configure(command=lambda:self.toggleRecord(0))
 
-        self.toggleRecordBut1 = tk.Button(self.root,font=BUTTON_FONT, text="REC 1",fg="black", activebackground=BUTTON_ACTIVE_BG, bg=BUTTON_BG,height=3)
+        self.toggleRecordBut1 = tk.Button(self.root,font=BUTTON_FONT, text="REC 1",fg="black", activebackground=BUTTON_ACTIVE_BG, bg=BUTTON_BG,height=BTN_HEIGHT)
         self.toggleRecordBut1.grid(row=3, column=0)
         self.toggleRecordBut1.configure(command= lambda:self.toggleRecord(1))
 
-        self.toggleShowVideoBut = tk.Button(self.root,font=BUTTON_FONT, text="HIDE", activebackground=BUTTON_ACTIVE_BG, bg=BUTTON_BG,height=3)
+        self.toggleShowVideoBut = tk.Button(self.root,font=BUTTON_FONT, text="HIDE", activebackground=BUTTON_ACTIVE_BG, bg=BUTTON_BG,height=BTN_HEIGHT)
         self.toggleShowVideoBut.grid(row=4, column=0)
         self.toggleShowVideoBut.configure(command=self.toggleShowVideo)
 
