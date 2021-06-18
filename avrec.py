@@ -66,7 +66,10 @@ class AudioRecorder():
 
         if self.open == True:
             self.open = False
-            self.audio_thread.join()
+            try:
+                self.audio_thread.join()
+            except:
+                pass
             time.sleep(1)
             self.stream.stop_stream()
             self.stream.close()
@@ -210,6 +213,7 @@ class Application:
         if (self.showVideo):
             self.toggleShowVideoBut.configure(text="HIDE")
         else:
+            self.panel.config(image=None, bg=BG)  # show the image
             self.toggleShowVideoBut.configure(text="SHOW")
 
     def switchCam(self):
