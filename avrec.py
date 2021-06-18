@@ -287,9 +287,10 @@ class Application:
             self.recordAVMergeInfo(self.out1FileName, self.frame_counts1, self.start_time1, self.end_time1, 0)
 
         try:
-            self.audio_thread.stop()
+
             while threading.active_count() > 1:
                 time.sleep(1)
+            self.audio_thread.stop()
         except NameError:
             print("No audio thread started")
         self.root.destroy()
