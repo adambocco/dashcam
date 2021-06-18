@@ -5,6 +5,7 @@ import threading
 import time
 import subprocess
 import os
+import sys
 from PIL import Image, ImageTk
 import tkinter as tk
 import argparse
@@ -287,17 +288,16 @@ class Application:
             self.recordAVMergeInfo(self.out1FileName, self.frame_counts1, self.start_time1, self.end_time1, 0)
 
         try:
-
-            while threading.active_count() > 1:
-                time.sleep(1)
             self.audio_thread.stop()
+
         except NameError:
             print("No audio thread started")
+        
         self.root.destroy()
         self.vs0.release()  # release web camera 0
         self.vs1.release()  # release web camera 1
         cv2.destroyAllWindows()  # it is not mandatory in this application
-
+        exit()
 
 
     def start_audio_recording(self, filename):
