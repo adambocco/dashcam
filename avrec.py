@@ -127,8 +127,8 @@ class Application:
         self.root.bind("<F11>", self.toggleFullScreen)
         self.root.bind("<Escape>", self.quitFullScreen)
         # These are compatible with 3.5inch 480, 320 display
-        w = 480  # width for the Tk root
-        h = 320  # height for the Tk root
+        w = 1024  # width for the Tk root
+        h = 600  # height for the Tk root
         self.root.resizable(0, 0)
         ws = self.root .winfo_screenwidth()  # width of the screen
         hs = self.root .winfo_screenheight()  # height of the screen
