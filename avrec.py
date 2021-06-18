@@ -66,6 +66,7 @@ class AudioRecorder():
 
         if self.open == True:
             self.open = False
+            self.audio_thread.join()
             time.sleep(1)
             self.stream.stop_stream()
             self.stream.close()
@@ -84,8 +85,8 @@ class AudioRecorder():
     # Launches the audio recording function using a thread
     def start(self):
         self.startTime = time.time()
-        audio_thread = threading.Thread(target=self.record)
-        audio_thread.start()
+        self.audio_thread = threading.Thread(target=self.record)
+        self.audio_thread.start()
 
 
 class Application:
@@ -224,7 +225,7 @@ class Application:
         if cam==0:
             if (self.recording0): # Stop recording cam 0
                 self.recording0 = False
-                audioDuration = audio_thread.stop()
+                audioDuration = self.audio_thread.stop()
                 while threading.active_count() > 1:
                     time.sleep(0.5)
                 self.out0.release()
@@ -234,7 +235,7 @@ class Application:
                 self.toggleRecordBut0.config(text="REC 0", fg="black")
                 
             else: # Start recording cam 0
-                start_audio_recording("./DASH0-Audio/"+datetimeStamp)
+                self.start_audio_recording("./DASH0-Audio/"+datetimeStamp)
                 self.start_time0 = time.time()
                 self.out0FileName = "./DASH0-Video/"+datetimeStamp+".avi"
                 self.out0 = cv2.VideoWriter(self.out0FileName, self.fourcc, 10, (640, 480))
@@ -267,7 +268,7 @@ class Application:
         
         if (self.recording0): # Stop recording cam 0
             self.recording0 = False
-            audioDuration = audio_thread.stop()
+            audioDuration = self.audio_thread.stop()
             self.end_time0 = time.time()
             while threading.active_count() > 1:
                 time.sleep(0.5)
@@ -282,7 +283,7 @@ class Application:
             self.recordAVMergeInfo(self.out1FileName, self.frame_counts1, self.start_time1, self.end_time1, 0)
 
         try:
-            audio_thread.stop()
+            self.stop()
             while threading.active_count() > 1:
                 time.sleep(1)
         except NameError:
@@ -294,13 +295,13 @@ class Application:
 
 
 
-def start_audio_recording(filename):
-    global audio_thread
-    audio_thread = AudioRecorder(filename)
-    print("Audio thread: ",audio_thread)
-    print("Audio thread type: ", type(audio_thread))
-    audio_thread.start()
-    return
+    def start_audio_recording(self, filename):
+        self.audio_thread
+        self.audio_thread = AudioRecorder(filename)
+        print("Audio thread: ",self.audio_thread)
+        print("Audio thread type: ", type(self.audio_thread))
+        self.audio_thread.start()
+        return
     
 
 def find_camera_indices():
