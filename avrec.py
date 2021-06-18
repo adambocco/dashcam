@@ -296,7 +296,6 @@ class Application:
 
 
     def start_audio_recording(self, filename):
-        self.audio_thread
         self.audio_thread = AudioRecorder(filename)
         print("Audio thread: ",self.audio_thread)
         print("Audio thread type: ", type(self.audio_thread))
