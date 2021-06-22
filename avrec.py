@@ -169,16 +169,16 @@ class Application:
         self.botQuit.grid(row=0, column=0)
         self.botQuit.configure(command=self.destructor)
 
-        self.recording0Label = Label(self.root, font=LABEL_FONT, text="REC FRONT" if GPIO.input(RECORD_FRONT_PIN)==GPIO.HIGH else "")
+        self.recording0Label = tk.Label(self.root, font=LABEL_FONT, text="REC FRONT" if GPIO.input(RECORD_FRONT_PIN)==GPIO.HIGH else "")
         self.recording0Label.grid(row=0, column=1)
 
-        self.recording1Label = Label(self.root, font=LABEL_FONT, text="REC REAR" if GPIO.input(RECORD_REAR_PIN)==GPIO.HIGH else "")
+        self.recording1Label = tk.Label(self.root, font=LABEL_FONT, text="REC REAR" if GPIO.input(RECORD_REAR_PIN)==GPIO.HIGH else "")
         self.recording1Label.grid(row=0, column=2)
 
-        self.enableShowLabel = Label(self.root, font=LABEL_FONT, text="SHOWING" if GPIO.input(ENABLE_SHOW_PIN)==GPIO.HIGH else "")
+        self.enableShowLabel = tk.Label(self.root, font=LABEL_FONT, text="SHOWING" if GPIO.input(ENABLE_SHOW_PIN)==GPIO.HIGH else "")
         self.enableShowLabel.grid(row=0, column=3)
 
-        self.toggleShowLabel = Label(self.root, font=LABEL_FONT, text="REAR" if GPIO.input(TOGGLE_SHOW_PIN)==GPIO.HIGH else "FRONT")
+        self.toggleShowLabel = tk.Label(self.root, font=LABEL_FONT, text="REAR" if GPIO.input(TOGGLE_SHOW_PIN)==GPIO.HIGH else "FRONT")
         self.toggleShowLabel.grid(row=0, column=4)
 
         # self.switchBut = tk.Button(self.root, font=BUTTON_FONT,activebackground=BUTTON_ACTIVE_BG,  text="REAR", anchor="w", bg=BUTTON_BG,height=BTN_HEIGHT)
