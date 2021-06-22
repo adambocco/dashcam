@@ -201,6 +201,7 @@ class Application:
         # self.video_loop()
         self.thr = threading.Thread(target=self.video_loop, args=())
         self.thr.start()
+        print("THREAD JOINED: ",self.thr.join())
         
         
     def toggleFullScreen(self, event):
