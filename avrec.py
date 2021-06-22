@@ -334,6 +334,7 @@ class Application:
 
         try:
             self.audio_thread.stop()
+        exit(0)
 
         except (NameError, AttributeError) as e:
             print("No audio thread started")
