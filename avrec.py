@@ -165,6 +165,8 @@ class Application:
         self.panel = tk.Label(self.root, bg=BG)  # initialize image panel
         self.panel.grid(row=1, column=0, columnspan=6)
 
+        self.readGPIO = True
+
         self.botQuit = tk.Button(self.root, font=BUTTON_FONT, text="EXIT", bg="#ffafaf", activebackground=BUTTON_ACTIVE_BG,height=BTN_HEIGHT)
         self.botQuit.grid(row=0, column=0)
         self.botQuit.configure(command=self.destructor)
@@ -201,6 +203,9 @@ class Application:
         # self.video_loop()
         self.thr = threading.Thread(target=self.video_loop, args=())
         self.thr.start()
+
+        self.gpioThread = threading.Thread(target=self.handleToggleSwitches, args=())
+        self.gpioThread.start()
         
         
     def toggleFullScreen(self, event):
@@ -214,8 +219,6 @@ class Application:
     def video_loop(self):
         while True:
             """ Get frame from the video stream and show it in Tkinter """
-
-            self.handleToggleSwitches()
 
             ok0, frame0 = self.vs0.read()  # read frame from video stream
             ok1, frame1 = self.vs1.read()  # read frame from video stream
@@ -241,29 +244,35 @@ class Application:
         # self.root.after(self.loopInterval, self.video_loop)
 
     def handleToggleSwitches(self):
-        if (GPIO.input(RECORD_FRONT_PIN) == GPIO.LOW) == self.recording0:
-            print("RECORD FRONT CHANGED: ",self.recording0)
-            self.toggleRecord(0)
-            self.recording0 = not self.recording0
-            self.recording0Label.config(text="REC FRONT" if self.recording0 else "")
+        GPIO.setmode(GPIO.BCM)
+        GPIO.setup(RECORD_FRONT_PIN, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+        GPIO.setup(RECORD_REAR_PIN, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+        GPIO.setup(ENABLE_SHOW_PIN, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+        GPIO.setup(TOGGLE_SHOW_PIN, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+        while self.readGPIO:
+            if (GPIO.input(RECORD_FRONT_PIN) == GPIO.LOW) == self.recording0:
+                print("RECORD FRONT CHANGED: ",self.recording0)
+                self.toggleRecord(0)
+                self.recording0 = not self.recording0
+                self.recording0Label.config(text="REC FRONT" if self.recording0 else "")
 
 
-        if (GPIO.input(RECORD_REAR_PIN) == GPIO.LOW) == self.recording1:
-            print("RECORD REAR CHANGED: ",self.recording1)
-            self.toggleRecord(1)
-            self.recording1 = not self.recording1
-            self.recording1Label.config(text="REC REAR" if self.recording1 else "")
+            if (GPIO.input(RECORD_REAR_PIN) == GPIO.LOW) == self.recording1:
+                print("RECORD REAR CHANGED: ",self.recording1)
+                self.toggleRecord(1)
+                self.recording1 = not self.recording1
+                self.recording1Label.config(text="REC REAR" if self.recording1 else "")
 
 
-        if (GPIO.input(ENABLE_SHOW_PIN) == GPIO.LOW) == self.showVideo:
-            print("SHOW VIDEO: ",self.showVideo)
-            self.showVideo = not self.showVideo
-            self.enableShowLabel.config(text="SHOWING" if self.showVideo else "")
+            if (GPIO.input(ENABLE_SHOW_PIN) == GPIO.LOW) == self.showVideo:
+                print("SHOW VIDEO: ",self.showVideo)
+                self.showVideo = not self.showVideo
+                self.enableShowLabel.config(text="SHOWING" if self.showVideo else "")
 
-        if (GPIO.input(TOGGLE_SHOW_PIN) == GPIO.HIGH) == (self.curCam == 1):
-            print("RECORD FRONT CHANGED: ",self.curCam)
-            self.curCam = 0 if self.curCam == 1 else 1
-            self.toggleShowLabel.config(text="REAR" if self.curCam == 1 else "FRONT")
+            if (GPIO.input(TOGGLE_SHOW_PIN) == GPIO.HIGH) == (self.curCam == 1):
+                print("RECORD FRONT CHANGED: ",self.curCam)
+                self.curCam = 0 if self.curCam == 1 else 1
+                self.toggleShowLabel.config(text="REAR" if self.curCam == 1 else "FRONT")
 
 
     def toggleRecord(self,cam):
@@ -304,7 +313,7 @@ class Application:
             log.write(f"{filename},{fps},{t}, {audioDuration}\n")
 
     def destructor(self):
-
+        self.readGPIO = False
         GPIO.cleanup()
         
         if (self.recording0): # Stop recording cam 0
