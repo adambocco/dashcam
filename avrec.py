@@ -230,7 +230,7 @@ class Application:
             if self.showVideo and shownOk:
                 # convert colors from BGR to RGBA
                 cv2image = cv2.cvtColor(shownFrame, cv2.COLOR_BGR2RGBA)
-                cv2image = imutils.resize(cv2image, height=600)
+                cv2image = imutils.resize(cv2image, width=1024)
 
                 # convert image for tkinter
                 imgtk = ImageTk.PhotoImage(image=Image.fromarray(cv2image))
