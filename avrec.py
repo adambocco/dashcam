@@ -313,6 +313,7 @@ class Application:
             log.write(f"{filename},{fps},{t}, {audioDuration}\n")
 
     def destructor(self):
+        print("CLEANING UP GPIOs")
         self.readGPIO = False
         GPIO.cleanup()
         
