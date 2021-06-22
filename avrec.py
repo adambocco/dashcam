@@ -159,7 +159,7 @@ class Application:
         self.root .geometry('%dx%d+%d+%d' % (w, h, x, y))
         # set window title
         self.root.title("DASHCAM")
-        self.root.protocol('WM_DELETE_WINDOW', self.destructor)
+        # self.root.protocol('WM_DELETE_WINDOW', self.destructor)
         self.root.config(bg=BG)
 
         self.panel = tk.Label(self.root, bg=BG)  # initialize image panel
