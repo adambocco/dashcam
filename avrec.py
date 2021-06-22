@@ -242,12 +242,16 @@ class Application:
 
     def handleToggleSwitches(self):
         if (GPIO.input(RECORD_FRONT_PIN) == GPIO.LOW) == self.recording0:
+            self.toggleRecord(0)
             self.recording0 = not self.recording0
             self.recording0Label.config(text="REC FRONT" if self.recording0 else "")
 
+
         if (GPIO.input(RECORD_REAR_PIN) == GPIO.LOW) == self.recording1:
+            self.toggleRecord(1)
             self.recording1 = not self.recording1
             self.recording1Label.config(text="REC REAR" if self.recording1 else "")
+
 
         if (GPIO.input(ENABLE_SHOW_PIN) == GPIO.LOW) == self.showVideo:
             self.showVideo = not self.showVideo
@@ -255,33 +259,13 @@ class Application:
 
         if (GPIO.input(TOGGLE_SHOW_PIN) == GPIO.HIGH) == (self.curCam == 1):
             self.curCam = 0 if self.curCam == 1 else 1
-            self.enableShowLabel.config(text="REAR" if self.curCam == 1 else "FRONT")
+            self.toggleShowLabel.config(text="REAR" if self.curCam == 1 else "FRONT")
 
-
-
-            
-
-    def toggleShowVideo(self):
-        self.showVideo = not self.showVideo
-        if (self.showVideo):
-            self.toggleShowVideoBut.configure(text="HIDE")
-        else:
-            self.panel.config(image=None, bg=BG)  # show the image
-            self.toggleShowVideoBut.configure(text="SHOW")
-
-    def switchCam(self):
-        if self.curCam == 1:
-            self.curCam = 0
-            self.switchBut.config(text="FRNT")
-        else:
-            self.curCam = 1
-            self.switchBut.config(text="REAR")
 
     def toggleRecord(self,cam):
         datetimeStamp = datetime.now().strftime("%d-%m-%Y-%H-%M")
         if cam==0:
             if (self.recording0): # Stop recording cam 0
-                self.recording0 = False
                 audioDuration = self.audio_thread.stop()
                 while threading.active_count() > 1:
                     time.sleep(0.5)
@@ -298,10 +282,8 @@ class Application:
                 self.out0 = cv2.VideoWriter(self.out0FileName, self.fourcc, 10, (640, 480))
                 self.toggleRecordBut0.config(text="STOP 0", fg="red")
                 time.sleep(0.5)
-                self.recording0 = True
         elif cam==1: 
             if (self.recording1): # Stop recording cam 1
-                self.recording1 = False
                 self.out1.release()
                 self.end_time1 = time.time()
                 self.recordAVMergeInfo(self.out1FileName, self.frame_counts1, self.start_time1, self.end_time1, 0)
@@ -313,7 +295,7 @@ class Application:
                 self.out1 = cv2.VideoWriter(self.out1FileName, self.fourcc, 10, (640, 480))
                 self.toggleRecordBut1.config(text="STOP 1", fg="red")
                 time.sleep(0.5)
-                self.recording1 = True
+
 
     def recordAVMergeInfo(self, filename, framecount, start, end, audioDuration):
         t = end-start
