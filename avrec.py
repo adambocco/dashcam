@@ -242,22 +242,26 @@ class Application:
 
     def handleToggleSwitches(self):
         if (GPIO.input(RECORD_FRONT_PIN) == GPIO.LOW) == self.recording0:
+            print("RECORD FRONT CHANGED: ",self.recording0)
             self.toggleRecord(0)
             self.recording0 = not self.recording0
             self.recording0Label.config(text="REC FRONT" if self.recording0 else "")
 
 
         if (GPIO.input(RECORD_REAR_PIN) == GPIO.LOW) == self.recording1:
+            print("RECORD REAR CHANGED: ",self.recording1)
             self.toggleRecord(1)
             self.recording1 = not self.recording1
             self.recording1Label.config(text="REC REAR" if self.recording1 else "")
 
 
         if (GPIO.input(ENABLE_SHOW_PIN) == GPIO.LOW) == self.showVideo:
+            print("SHOW VIDEO: ",self.showVideo)
             self.showVideo = not self.showVideo
             self.enableShowLabel.config(text="SHOWING" if self.showVideo else "")
 
         if (GPIO.input(TOGGLE_SHOW_PIN) == GPIO.HIGH) == (self.curCam == 1):
+            print("CAMCHANGED: ",self.curCam)
             self.curCam = 0 if self.curCam == 1 else 1
             self.toggleShowLabel.config(text="REAR" if self.curCam == 1 else "FRONT")
 
