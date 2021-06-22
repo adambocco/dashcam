@@ -16,18 +16,35 @@ import RPi.GPIO as GPIO
 import picamera
 import imutils
 from datetime import datetime
+import RPi.GPIO as GPIO
+
+BG = "black"
+BUTTON_BG = "#eeffee"
+BUTTON_ACTIVE_BG="#ccddff"
+BUTTON_FONT = ("Helvetica", 10, "bold")
+LABEL_FONT = ("Helvetica", 10, "bold")
+BTN_HEIGHT = 1
+
+RECORD_FRONT_PIN = 17
+RECORD_REAR_PIN = 27
+ENABLE_SHOW_PIN = 22
+TOGGLE_SHOW_PIN = 23
+
+GPIO.setwarnings(false)
+GPIO.setmode(GPIO.BCM)
+GPIO.setup(RECORD_FRONT_PIN, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+GPIO.setup(RECORD_REAR_PIN, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+GPIO.setup(ENABLE_SHOW_PIN, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+GPIO.setup(TOGGLE_SHOW_PIN, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+
+
+
 
 # Necessary command for opencv to use CSI connected camera
 if not os.path.exists('/dev/video0'):
     rpistr = "sudo modprobe bcm2835-v4l2"
     p = subprocess.Popen(rpistr, shell=True, preexec_fn=os.setsid)
     time.sleep(1)
-
-BG = "black"
-BUTTON_BG = "#eeffee"
-BUTTON_ACTIVE_BG="#ccddff"
-BUTTON_FONT = ("Helvetica", 17, "bold")
-BTN_HEIGHT=3
 
 class AudioRecorder():
 
@@ -152,21 +169,33 @@ class Application:
         self.botQuit.grid(row=0, column=0)
         self.botQuit.configure(command=self.destructor)
 
-        self.switchBut = tk.Button(self.root, font=BUTTON_FONT,activebackground=BUTTON_ACTIVE_BG,  text="REAR", anchor="w", bg=BUTTON_BG,height=BTN_HEIGHT)
-        self.switchBut.grid(row=1, column=0)
-        self.switchBut.configure(command=self.switchCam)
+        self.recording1Label = Label(self.root, font=LABEL_FONT, text="REC FRONT" if GPIO.input(RECORD_FRONT_PIN)==GPIO.HIGH else "")
+        self.recording1Label.grid(row=0, column=1)
 
-        self.toggleRecordBut0 = tk.Button(self.root,font=BUTTON_FONT, text="REC 0",fg="black", activebackground=BUTTON_ACTIVE_BG, bg=BUTTON_BG,height=BTN_HEIGHT)
-        self.toggleRecordBut0.grid(row=2, column=0)
-        self.toggleRecordBut0.configure(command=lambda:self.toggleRecord(0))
+        self.recording2Label = Label(self.root, font=LABEL_FONT, text="REC REAR" if GPIO.input(RECORD_REAR_PIN)==GPIO.HIGH else "")
+        self.recording2Label.grid(row=0, column=2)
 
-        self.toggleRecordBut1 = tk.Button(self.root,font=BUTTON_FONT, text="REC 1",fg="black", activebackground=BUTTON_ACTIVE_BG, bg=BUTTON_BG,height=BTN_HEIGHT)
-        self.toggleRecordBut1.grid(row=3, column=0)
-        self.toggleRecordBut1.configure(command= lambda:self.toggleRecord(1))
+        self.enableShowLabel = Label(self.root, font=LABEL_FONT, text="SHOWING" if GPIO.input(ENABLE_SHOW_PIN)==GPIO.HIGH else "NOT SHOWING")
+        self.enableShowLabel.grid(row=0, column=3)
 
-        self.toggleShowVideoBut = tk.Button(self.root,font=BUTTON_FONT, text="HIDE", activebackground=BUTTON_ACTIVE_BG, bg=BUTTON_BG,height=BTN_HEIGHT)
-        self.toggleShowVideoBut.grid(row=4, column=0)
-        self.toggleShowVideoBut.configure(command=self.toggleShowVideo)
+        self.toggleShowLabel = Label(self.root, font=LABEL_FONT, text="SHOWING REAR" if GPIO.input(TOGGLE_SHOW_PIN)==GPIO.HIGH else "SHOWING FRONT")
+        self.toggleShowLabel.grid(row=0, column=4)
+
+        # self.switchBut = tk.Button(self.root, font=BUTTON_FONT,activebackground=BUTTON_ACTIVE_BG,  text="REAR", anchor="w", bg=BUTTON_BG,height=BTN_HEIGHT)
+        # self.switchBut.grid(row=1, column=0)
+        # self.switchBut.configure(command=self.switchCam)
+
+        # self.toggleRecordBut0 = tk.Button(self.root,font=BUTTON_FONT, text="REC 0",fg="black", activebackground=BUTTON_ACTIVE_BG, bg=BUTTON_BG,height=BTN_HEIGHT)
+        # self.toggleRecordBut0.grid(row=2, column=0)
+        # self.toggleRecordBut0.configure(command=lambda:self.toggleRecord(0))
+
+        # self.toggleRecordBut1 = tk.Button(self.root,font=BUTTON_FONT, text="REC 1",fg="black", activebackground=BUTTON_ACTIVE_BG, bg=BUTTON_BG,height=BTN_HEIGHT)
+        # self.toggleRecordBut1.grid(row=3, column=0)
+        # self.toggleRecordBut1.configure(command= lambda:self.toggleRecord(1))
+
+        # self.toggleShowVideoBut = tk.Button(self.root,font=BUTTON_FONT, text="HIDE", activebackground=BUTTON_ACTIVE_BG, bg=BUTTON_BG,height=BTN_HEIGHT)
+        # self.toggleShowVideoBut.grid(row=4, column=0)
+        # self.toggleShowVideoBut.configure(command=self.toggleShowVideo)
 
         # self.video_loop()
         self.thr = threading.Thread(target=self.video_loop, args=())
@@ -184,6 +213,12 @@ class Application:
     def video_loop(self):
         while True:
             """ Get frame from the video stream and show it in Tkinter """
+
+            print("Record Front: ",GPIO.input(RECORD_FRONT_PIN) == GPIO.HIGH)
+            print("Record Rear: ",GPIO.input(RECORD_REAR_PIN) == GPIO.HIGH)
+            print("Enable Show: ",GPIO.input(ENABLE_SHOW_PIN) == GPIO.HIGH)
+            print("Toggle Show: ", "Front" if GPIO.input(TOGGLE_SHOW_PIN) == GPIO.HIGH else "Rear")
+
 
             ok0, frame0 = self.vs0.read()  # read frame from video stream
             ok1, frame1 = self.vs1.read()  # read frame from video stream
@@ -204,7 +239,7 @@ class Application:
                 imgtk = ImageTk.PhotoImage(image=Image.fromarray(cv2image))
                 self.panel.config(image=imgtk, bg=BG)  # show the image
                 self.panel.imgtk = imgtk  # anchor imgtk so it does not be deleted by garbage-collector
-
+            time.sleep(5)
         
         # call the same function after {self.loopInterval} milliseconds
         # self.root.after(self.loopInterval, self.video_loop)
@@ -270,6 +305,8 @@ class Application:
             log.write(f"{filename},{fps},{t}, {audioDuration}\n")
 
     def destructor(self):
+
+        GPIO.cleanup()
         
         if (self.recording0): # Stop recording cam 0
             self.recording0 = False
