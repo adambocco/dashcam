@@ -334,7 +334,6 @@ class Application:
 
         try:
             self.audio_thread.stop()
-        exit(0)
 
         except (NameError, AttributeError) as e:
             print("No audio thread started")
@@ -344,7 +343,6 @@ class Application:
         self.vs1.release()  # release web camera 1
         cv2.destroyAllWindows()  # it is not mandatory in this application
         exit()
-
 
     def start_audio_recording(self, filename):
         self.audio_thread = AudioRecorder(filename)
@@ -368,3 +366,4 @@ def find_camera_indices():
 if __name__ == "__main__":
     pba = Application()
     pba.root.mainloop()
+    exit()
