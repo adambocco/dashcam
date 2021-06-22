@@ -169,17 +169,18 @@ class Application:
         self.botQuit.grid(row=0, column=0)
         self.botQuit.configure(command=self.destructor)
 
-        self.recording0Label = tk.Label(self.root, font=LABEL_FONT, text="REC FRONT" if GPIO.input(RECORD_FRONT_PIN)==GPIO.HIGH else "")
+        self.recording0Label = tk.Label(self.root, bg="#3f4a5b", fg="white", font=LABEL_FONT, text="REC FRONT" if GPIO.input(RECORD_FRONT_PIN)==GPIO.HIGH else "")
         self.recording0Label.grid(row=0, column=1)
 
-        self.recording1Label = tk.Label(self.root, font=LABEL_FONT, text="REC REAR" if GPIO.input(RECORD_REAR_PIN)==GPIO.HIGH else "")
+        self.recording1Label = tk.Label(self.root, bg="#3f4a5b", fg="white", font=LABEL_FONT, text="REC REAR" if GPIO.input(RECORD_REAR_PIN)==GPIO.HIGH else "")
         self.recording1Label.grid(row=0, column=2)
 
-        self.enableShowLabel = tk.Label(self.root, font=LABEL_FONT, text="SHOWING" if GPIO.input(ENABLE_SHOW_PIN)==GPIO.HIGH else "")
+        self.enableShowLabel = tk.Label(self.root, bg="#3f4a5b", fg="white", font=LABEL_FONT, text="SHOWING" if GPIO.input(ENABLE_SHOW_PIN)==GPIO.HIGH else "")
         self.enableShowLabel.grid(row=0, column=3)
 
-        self.toggleShowLabel = tk.Label(self.root, font=LABEL_FONT, text="REAR" if GPIO.input(TOGGLE_SHOW_PIN)==GPIO.HIGH else "FRONT")
+        self.toggleShowLabel = tk.Label(self.root, bg="#3f4a5b", fg="white", font=LABEL_FONT, text="REAR" if GPIO.input(TOGGLE_SHOW_PIN)==GPIO.HIGH else "FRONT")
         self.toggleShowLabel.grid(row=0, column=4)
+
 
         # self.switchBut = tk.Button(self.root, font=BUTTON_FONT,activebackground=BUTTON_ACTIVE_BG,  text="REAR", anchor="w", bg=BUTTON_BG,height=BTN_HEIGHT)
         # self.switchBut.grid(row=1, column=0)
@@ -214,11 +215,6 @@ class Application:
         while True:
             """ Get frame from the video stream and show it in Tkinter """
 
-            print("Record Front: ",GPIO.input(RECORD_FRONT_PIN) == GPIO.HIGH)
-            print("Record Rear: ",GPIO.input(RECORD_REAR_PIN) == GPIO.HIGH)
-            print("Enable Show: ",GPIO.input(ENABLE_SHOW_PIN) == GPIO.HIGH)
-            print("Toggle Show: ", "Front" if GPIO.input(TOGGLE_SHOW_PIN) == GPIO.HIGH else "Rear")
-
             self.handleToggleSwitches()
 
             ok0, frame0 = self.vs0.read()  # read frame from video stream
@@ -240,39 +236,27 @@ class Application:
                 imgtk = ImageTk.PhotoImage(image=Image.fromarray(cv2image))
                 self.panel.config(image=imgtk, bg=BG)  # show the image
                 self.panel.imgtk = imgtk  # anchor imgtk so it does not be deleted by garbage-collector
-            time.sleep(5)
         
         # call the same function after {self.loopInterval} milliseconds
         # self.root.after(self.loopInterval, self.video_loop)
 
     def handleToggleSwitches(self):
-        if GPIO.input(RECORD_FRONT_PIN) == GPIO.HIGH:
-            self.recording0 = True
-            self.recording0Label.config(text="REC FRONT")
-        else:
-            self.recording0 = False
-            self.recording0Label.config(text="")
+        if (GPIO.input(RECORD_FRONT_PIN) == GPIO.LOW) == self.recording0:
+            self.recording0 = not self.recording0
+            self.recording0Label.config(text="REC FRONT" if self.recording0 else "")
 
-        if GPIO.input(RECORD_REAR_PIN) == GPIO.HIGH:
-            self.recording1 = True
-            self.recording1Label.config(text="REC REAR")
-        else:
-            self.recording1 = False
-            self.recording1Label.config(text="")
+        if (GPIO.input(RECORD_REAR_PIN) == GPIO.LOW) == self.recording1:
+            self.recording1 = not self.recording1
+            self.recording1Label.config(text="REC REAR" if self.recording1 else "")
 
-        if GPIO.input(ENABLE_SHOW_PIN) == GPIO.HIGH:
-            self.showVideo = True
-            self.enableShowLabel.config(text="SHOWING")
-        else:
-            self.showVideo = False
-            self.enableShowLabel.config(text="")
+        if (GPIO.input(ENABLE_SHOW_PIN) == GPIO.LOW) == self.showVideo:
+            self.showVideo = not self.showVideo
+            self.enableShowLabel.config(text="SHOWING" if self.showVideo else "")
 
-        if GPIO.input(TOGGLE_SHOW_PIN) == GPIO.HIGH:
-            self.curCam = 0
-            self.enableShowLabel.config(text="REAR")
-        else:
-            self.curCam = 1
-            self.enableShowLabel.config(text="FRONT")
+        if (GPIO.input(TOGGLE_SHOW_PIN) == GPIO.HIGH) == (self.curCam == 1):
+            self.curCam = 0 if self.curCam == 1 else 1
+            self.enableShowLabel.config(text="REAR" if self.curCam == 1 else "FRONT")
+
 
 
             
