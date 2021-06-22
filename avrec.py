@@ -201,7 +201,6 @@ class Application:
         # self.video_loop()
         self.thr = threading.Thread(target=self.video_loop, args=())
         self.thr.start()
-        print("THREAD JOINED: ",self.thr.join())
         
         
     def toggleFullScreen(self, event):
@@ -262,7 +261,7 @@ class Application:
             self.enableShowLabel.config(text="SHOWING" if self.showVideo else "")
 
         if (GPIO.input(TOGGLE_SHOW_PIN) == GPIO.HIGH) == (self.curCam == 1):
-            print("CAMCHANGED: ",self.curCam)
+            print("RECORD FRONT CHANGED: ",self.curCam)
             self.curCam = 0 if self.curCam == 1 else 1
             self.toggleShowLabel.config(text="REAR" if self.curCam == 1 else "FRONT")
 
@@ -272,7 +271,7 @@ class Application:
         if cam==0:
             if (self.recording0): # Stop recording cam 0
                 audioDuration = self.audio_thread.stop()
-                while threading.active_count() > 1:
+                while threading.active_count() > 2:
                     time.sleep(0.5)
                 self.out0.release()
                 self.end_time0 = time.time()
