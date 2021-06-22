@@ -273,14 +273,12 @@ class Application:
                 self.end_time0 = time.time()
                 self.recordAVMergeInfo(self.out0FileName, self.frame_counts0, self.start_time0, self.end_time0, audioDuration)
                 self.frame_counts0 = 1
-                self.toggleRecordBut0.config(text="REC 0", fg="black")
                 
             else: # Start recording cam 0
                 self.start_audio_recording("./DASH0-Audio/"+datetimeStamp)
                 self.start_time0 = time.time()
                 self.out0FileName = "./DASH0-Video/"+datetimeStamp+".avi"
                 self.out0 = cv2.VideoWriter(self.out0FileName, self.fourcc, 10, (640, 480))
-                self.toggleRecordBut0.config(text="STOP 0", fg="red")
                 time.sleep(0.5)
         elif cam==1: 
             if (self.recording1): # Stop recording cam 1
@@ -288,12 +286,10 @@ class Application:
                 self.end_time1 = time.time()
                 self.recordAVMergeInfo(self.out1FileName, self.frame_counts1, self.start_time1, self.end_time1, 0)
                 self.frame_counts1 = 1
-                self.toggleRecordBut1.config(text="REC 1", fg="black")
             else: # Start recording cam 1
                 self.start_time1 = time.time()
                 self.out1FileName = "./DASH1-Video/"+datetimeStamp+".avi"
                 self.out1 = cv2.VideoWriter(self.out1FileName, self.fourcc, 10, (640, 480))
-                self.toggleRecordBut1.config(text="STOP 1", fg="red")
                 time.sleep(0.5)
 
 
