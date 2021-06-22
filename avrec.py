@@ -169,7 +169,7 @@ class Application:
 
         self.botQuit = tk.Button(self.root, font=BUTTON_FONT, text="EXIT", bg="#ffafaf", activebackground=BUTTON_ACTIVE_BG,height=BTN_HEIGHT)
         self.botQuit.grid(row=0, column=0)
-        self.botQuit.configure(command=self.destructor)
+        # self.botQuit.configure(command=self.destructor)
 
         self.recording0Label = tk.Label(self.root, bg="#3f4a5b", fg="white", font=LABEL_FONT, text="REC FRONT" if GPIO.input(RECORD_FRONT_PIN)==GPIO.HIGH else "")
         self.recording0Label.grid(row=0, column=1)
