@@ -163,7 +163,7 @@ class Application:
         self.root.config(bg=BG)
 
         self.panel = tk.Label(self.root, bg=BG)  # initialize image panel
-        self.panel.grid(row=1, rowspan=12, column=0)
+        self.panel.grid(row=1, column=0, columnspan=6)
 
         self.botQuit = tk.Button(self.root, font=BUTTON_FONT, text="EXIT", bg="#ffafaf", activebackground=BUTTON_ACTIVE_BG,height=BTN_HEIGHT)
         self.botQuit.grid(row=0, column=0)
