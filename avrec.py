@@ -159,7 +159,7 @@ class Application:
         self.root .geometry('%dx%d+%d+%d' % (w, h, x, y))
         # set window title
         self.root.title("DASHCAM")
-        # self.root.protocol('WM_DELETE_WINDOW', self.destructor)
+        self.root.protocol('WM_DELETE_WINDOW', self.destructor)
         self.root.config(bg=BG)
 
         self.panel = tk.Label(self.root, bg=BG)  # initialize image panel
@@ -167,9 +167,8 @@ class Application:
 
         self.readGPIO = True
 
-        self.botQuit = tk.Button(self.root, font=BUTTON_FONT, text="EXIT", bg="#ffafaf", activebackground=BUTTON_ACTIVE_BG,height=BTN_HEIGHT)
+        self.botQuit = tk.Button(self.root, font=BUTTON_FONT, text="EXIT", bg="#ffafaf", activebackground=BUTTON_ACTIVE_BG,height=BTN_HEIGHT, command=self.destructor)
         self.botQuit.grid(row=0, column=0)
-        # self.botQuit.configure(command=self.destructor)
 
         self.recording0Label = tk.Label(self.root, bg="#3f4a5b", fg="white", font=LABEL_FONT, text="REC FRONT" if GPIO.input(RECORD_FRONT_PIN)==GPIO.HIGH else "")
         self.recording0Label.grid(row=0, column=1)
