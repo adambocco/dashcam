@@ -170,16 +170,16 @@ class Application:
         self.botQuit = tk.Button(self.root, font=BUTTON_FONT, text="EXIT", bg="#ffafaf", activebackground=BUTTON_ACTIVE_BG,height=BTN_HEIGHT, command=self.destructor)
         self.botQuit.grid(row=0, column=0)
 
-        self.recording0Label = tk.Label(self.root, bg="#3f4a5b", fg="white", font=LABEL_FONT, text="REC FRONT" if GPIO.input(RECORD_FRONT_PIN)==GPIO.HIGH else "")
+        self.recording0Label = tk.Label(self.root, bg="black", fg="white", font=LABEL_FONT, text="REC FRONT" if GPIO.input(RECORD_FRONT_PIN)==GPIO.HIGH else "")
         self.recording0Label.grid(row=0, column=1)
 
-        self.recording1Label = tk.Label(self.root, bg="#3f4a5b", fg="white", font=LABEL_FONT, text="REC REAR" if GPIO.input(RECORD_REAR_PIN)==GPIO.HIGH else "")
+        self.recording1Label = tk.Label(self.root, bg="black", fg="white", font=LABEL_FONT, text="REC REAR" if GPIO.input(RECORD_REAR_PIN)==GPIO.HIGH else "")
         self.recording1Label.grid(row=0, column=2)
 
-        self.enableShowLabel = tk.Label(self.root, bg="#3f4a5b", fg="white", font=LABEL_FONT, text="SHOWING" if GPIO.input(ENABLE_SHOW_PIN)==GPIO.HIGH else "")
+        self.enableShowLabel = tk.Label(self.root, bg="black", fg="white", font=LABEL_FONT, text="SHOWING" if GPIO.input(ENABLE_SHOW_PIN)==GPIO.HIGH else "")
         self.enableShowLabel.grid(row=0, column=3)
 
-        self.toggleShowLabel = tk.Label(self.root, bg="#3f4a5b", fg="white", font=LABEL_FONT, text="REAR" if GPIO.input(TOGGLE_SHOW_PIN)==GPIO.HIGH else "FRONT")
+        self.toggleShowLabel = tk.Label(self.root, bg="black", fg="white", font=LABEL_FONT, text="REAR" if GPIO.input(TOGGLE_SHOW_PIN)==GPIO.HIGH else "FRONT")
         self.toggleShowLabel.grid(row=0, column=4)
 
 
@@ -279,7 +279,7 @@ class Application:
         if cam==0:
             if (self.recording0): # Stop recording cam 0
                 audioDuration = self.audio_thread.stop()
-                while threading.active_count() > 2:
+                while threading.active_count() > 3:
                     time.sleep(0.5)
                 self.out0.release()
                 self.end_time0 = time.time()
