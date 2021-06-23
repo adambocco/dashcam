@@ -183,7 +183,7 @@ class Application:
         self.toggleShowLabel = tk.Label(self.root, bg="black", fg="white", font=LABEL_FONT, text="REAR" if GPIO.input(TOGGLE_SHOW_PIN)==GPIO.HIGH else "FRONT")
         self.toggleShowLabel.grid(row=0, column=4)
 
-
+        self.recordingLock = False
         # self.switchBut = tk.Button(self.root, font=BUTTON_FONT,activebackground=BUTTON_ACTIVE_BG,  text="REAR", anchor="w", bg=BUTTON_BG,height=BTN_HEIGHT)
         # self.switchBut.grid(row=1, column=0)
         # self.switchBut.configure(command=self.switchCam)
@@ -224,12 +224,13 @@ class Application:
             ok1, frame1 = self.vs1.read()  # read frame from video stream
             shownFrame = frame0 if self.curCam == 0 else frame1
             shownOk = ok0 if self.curCam == 0 else ok1
-            if ok0 and self.recording0:  # frame captured without any errors
-                self.frame_counts0 += 1
-                self.out0.write(frame0)
-            if ok1 and self.recording1:
-                self.frame_counts1 += 1
-                self.out1.write(frame1)
+            if not self.recordingLock:
+                if ok0 and self.recording0:  # frame captured without any errors
+                    self.frame_counts0 += 1
+                    self.out0.write(frame0)
+                if ok1 and self.recording1:
+                    self.frame_counts1 += 1
+                    self.out1.write(frame1)
             if self.showVideo and shownOk:
                 # convert colors from BGR to RGBA
                 cv2image = cv2.cvtColor(shownFrame, cv2.COLOR_BGR2RGBA)
@@ -275,6 +276,7 @@ class Application:
 
     def toggleRecord(self,cam):
         datetimeStamp = datetime.now().strftime("%d-%m-%Y-%H-%M")
+        self.recordingLock = True
         if cam==0:
             self.recording0 = not self.recording0
             if (not self.recording0): # Stop recording cam 0
@@ -310,6 +312,7 @@ class Application:
                 self.out1FileName = "./DASH1-Video/"+datetimeStamp+".avi"
                 self.out1 = cv2.VideoWriter(self.out1FileName, self.fourcc, 10, (640, 480))
                 time.sleep(0.5)
+        self.recordingLock = False
 
 
 
