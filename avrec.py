@@ -83,6 +83,7 @@ class AudioRecorder():
     def stop(self):
 
         if self.open == True:
+            print("Stopping audio thread!")
             self.open = False
             time.sleep(0.5)
             self.stream.stop_stream()
@@ -103,6 +104,7 @@ class AudioRecorder():
     # Launches the audio recording function using a thread
     def start(self):
         self.startTime = time.time()
+        self.open = True
         self.audio_thread = threading.Thread(target=self.record)
         self.audio_thread.start()
 
@@ -277,8 +279,8 @@ class Application:
             if (self.recording0): # Stop recording cam 0
                 threadsBefore = threading.active_count()
                 audioDuration = self.audio_thread.stop()
-                while threadsBefore >= threading.active_count():
-                    time.sleep(0.5)
+                # while threadsBefore >= threading.active_count():
+                time.sleep(1)
                 self.out0.release()
                 self.end_time0 = time.time()
                 self.recordAVMergeInfo(self.out0FileName, self.frame_counts0, self.start_time0, self.end_time0, audioDuration)
