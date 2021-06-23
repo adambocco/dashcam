@@ -274,9 +274,10 @@ class Application:
                 self.showVideo = not self.showVideo
                 self.enableShowLabel.config(text="SHOWING" if self.showVideo else "")
                 self.panel.config(image='', bg="black", fg="white", text=cuteMessages[cmIndex])
-                cmIndex += 1
-                if cmIndex >= cmLength:
-                    cmIndex = 0
+                if self.showVideo:
+                    cmIndex += 1
+                    if cmIndex >= cmLength:
+                        cmIndex = 0
 
 
             if (GPIO.input(TOGGLE_SHOW_PIN) == GPIO.HIGH) == (self.curCam == 1):
