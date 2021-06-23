@@ -283,9 +283,11 @@ class Application:
                 while self.audio_thread.audio_thread.is_alive():
                     print("Audio thread still alive")
                     time.sleep(1)
+                print("Here 1")
                 self.out0.release()
                 self.end_time0 = time.time()
                 self.recordAVMergeInfo(self.out0FileName, self.frame_counts0, self.start_time0, self.end_time0, audioDuration)
+                print("Here 2")
                 self.frame_counts0 = 1
                 print("stopped recording front")
                 
