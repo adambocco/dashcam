@@ -252,15 +252,15 @@ class Application:
         while self.readGPIO:
             if (GPIO.input(RECORD_FRONT_PIN) == GPIO.LOW) == self.recording0:
                 print("RECORD FRONT CHANGED: ",self.recording0)
-                self.toggleRecord(0)
                 self.recording0 = not self.recording0
+                self.toggleRecord(0)
                 self.recording0Label.config(text="REC FRONT" if self.recording0 else "")
 
 
             if (GPIO.input(RECORD_REAR_PIN) == GPIO.LOW) == self.recording1:
                 print("RECORD REAR CHANGED: ",self.recording1)
-                self.toggleRecord(1)
                 self.recording1 = not self.recording1
+                self.toggleRecord(1)
                 self.recording1Label.config(text="REC REAR" if self.recording1 else "")
 
 
@@ -279,7 +279,6 @@ class Application:
         datetimeStamp = datetime.now().strftime("%d-%m-%Y-%H-%M")
         if cam==0:
             if (self.recording0): # Stop recording cam 0
-                self.out0.release()
                 audioDuration = self.audio_thread.stop()
                 while self.audio_thread.audio_thread.is_alive():
                     print("Audio thread still alive")
@@ -287,6 +286,7 @@ class Application:
                 print("Here 1")
 
                 self.end_time0 = time.time()
+                self.out0.release()
                 self.recordAVMergeInfo(self.out0FileName, self.frame_counts0, self.start_time0, self.end_time0, audioDuration)
                 print("Here 2")
                 self.frame_counts0 = 1
