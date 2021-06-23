@@ -279,8 +279,8 @@ class Application:
         if cam==0:
             if (self.recording0): # Stop recording cam 0
                 audioDuration = self.audio_thread.stop()
-                while threading.active_count() > 3:
-                    time.sleep(0.5)
+                # while threading.active_count() > 3:
+                time.sleep(0.5)
                 self.out0.release()
                 self.end_time0 = time.time()
                 self.recordAVMergeInfo(self.out0FileName, self.frame_counts0, self.start_time0, self.end_time0, audioDuration)
