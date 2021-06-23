@@ -267,6 +267,8 @@ class Application:
                 print("SHOW VIDEO: ",self.showVideo)
                 self.showVideo = not self.showVideo
                 self.enableShowLabel.config(text="SHOWING" if self.showVideo else "")
+                self.panel.config(image=None, bg="black", fg="white" text="Hey")
+
 
             if (GPIO.input(TOGGLE_SHOW_PIN) == GPIO.HIGH) == (self.curCam == 1):
                 print("RECORD FRONT CHANGED: ",self.curCam)
