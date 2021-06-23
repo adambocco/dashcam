@@ -84,23 +84,20 @@ class AudioRecorder():
 
         if self.open == True:
             self.open = False
-            try:
-                self.audio_thread.join()
-            except:
-                pass
-            time.sleep(1)
+            time.sleep(0.5)
             self.stream.stop_stream()
             self.stream.close()
             self.audio.terminate()
             self.endTime = time.time()
             self.duration = self.endTime - self.startTime
-            time.sleep(1)
+            time.sleep(0.5)
             waveFile = wave.open(self.audio_filename, 'wb')
             waveFile.setnchannels(self.channels)
             waveFile.setsampwidth(self.audio.get_sample_size(self.format))
             waveFile.setframerate(self.rate)
             waveFile.writeframes(b''.join(self.audio_frames)) # Audio write out at this point
             waveFile.close()
+        time.sleep(0.5)
         return self.duration
 
     # Launches the audio recording function using a thread
@@ -278,9 +275,10 @@ class Application:
         datetimeStamp = datetime.now().strftime("%d-%m-%Y-%H-%M")
         if cam==0:
             if (self.recording0): # Stop recording cam 0
+                threadsBefore = threading.active_count()
                 audioDuration = self.audio_thread.stop()
-                # while threading.active_count() > 3:
-                time.sleep(0.5)
+                while threadsBefore >= threading.active_count():
+                    time.sleep(0.5)
                 self.out0.release()
                 self.end_time0 = time.time()
                 self.recordAVMergeInfo(self.out0FileName, self.frame_counts0, self.start_time0, self.end_time0, audioDuration)
