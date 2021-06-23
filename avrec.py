@@ -250,6 +250,12 @@ class Application:
         GPIO.setup(RECORD_REAR_PIN, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
         GPIO.setup(ENABLE_SHOW_PIN, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
         GPIO.setup(TOGGLE_SHOW_PIN, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+
+
+        from messages import cuteMessages
+        cmLength = len(cuteMessages)
+        cmIndex = 0
+
         while self.readGPIO:
             if (GPIO.input(RECORD_FRONT_PIN) == GPIO.LOW) == self.recording0:
                 print("RECORD FRONT CHANGED: ",self.recording0)
@@ -267,7 +273,10 @@ class Application:
                 print("SHOW VIDEO: ",self.showVideo)
                 self.showVideo = not self.showVideo
                 self.enableShowLabel.config(text="SHOWING" if self.showVideo else "")
-                self.panel.config(image='', bg="black", fg="white", text="Hey")
+                self.panel.config(image='', bg="black", fg="white", text=cuteMessages[cmIndex])
+                cmIndex += 1
+                if cmIndex >= cmLength:
+                    cmIndex = 0
 
 
             if (GPIO.input(TOGGLE_SHOW_PIN) == GPIO.HIGH) == (self.curCam == 1):
