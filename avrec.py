@@ -88,6 +88,7 @@ class AudioRecorder():
             time.sleep(0.5)
             self.stream.stop_stream()
             self.stream.close()
+            print("Audio stream closed")
             self.audio.terminate()
             self.endTime = time.time()
             self.duration = self.endTime - self.startTime
@@ -98,6 +99,7 @@ class AudioRecorder():
             waveFile.setframerate(self.rate)
             waveFile.writeframes(b''.join(self.audio_frames)) # Audio write out at this point
             waveFile.close()
+            print("Wrote audio")
         time.sleep(0.5)
         return self.duration
 
@@ -277,14 +279,15 @@ class Application:
         datetimeStamp = datetime.now().strftime("%d-%m-%Y-%H-%M")
         if cam==0:
             if (self.recording0): # Stop recording cam 0
-                threadsBefore = threading.active_count()
                 audioDuration = self.audio_thread.stop()
-                # while threadsBefore >= threading.active_count():
-                time.sleep(1)
+                while self.audio_thread.audio_thread.is_alive():
+                    print("Audio thread still alive")
+                    time.sleep(1)
                 self.out0.release()
                 self.end_time0 = time.time()
                 self.recordAVMergeInfo(self.out0FileName, self.frame_counts0, self.start_time0, self.end_time0, audioDuration)
                 self.frame_counts0 = 1
+                print("stopped recording front")
                 
             else: # Start recording cam 0
                 self.start_audio_recording("./DASH0-Audio/"+datetimeStamp)
@@ -303,6 +306,7 @@ class Application:
                 self.out1FileName = "./DASH1-Video/"+datetimeStamp+".avi"
                 self.out1 = cv2.VideoWriter(self.out1FileName, self.fourcc, 10, (640, 480))
                 time.sleep(0.5)
+
 
 
     def recordAVMergeInfo(self, filename, framecount, start, end, audioDuration):
