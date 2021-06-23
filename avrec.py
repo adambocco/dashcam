@@ -279,12 +279,13 @@ class Application:
         datetimeStamp = datetime.now().strftime("%d-%m-%Y-%H-%M")
         if cam==0:
             if (self.recording0): # Stop recording cam 0
+                self.out0.release()
                 audioDuration = self.audio_thread.stop()
                 while self.audio_thread.audio_thread.is_alive():
                     print("Audio thread still alive")
                     time.sleep(1)
                 print("Here 1")
-                self.out0.release()
+
                 self.end_time0 = time.time()
                 self.recordAVMergeInfo(self.out0FileName, self.frame_counts0, self.start_time0, self.end_time0, audioDuration)
                 print("Here 2")
