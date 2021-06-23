@@ -278,7 +278,7 @@ class Application:
     def toggleRecord(self,cam):
         datetimeStamp = datetime.now().strftime("%d-%m-%Y-%H-%M")
         if cam==0:
-            if (self.recording0): # Stop recording cam 0
+            if (not self.recording0): # Stop recording cam 0
                 audioDuration = self.audio_thread.stop()
                 while self.audio_thread.audio_thread.is_alive():
                     print("Audio thread still alive")
@@ -299,7 +299,7 @@ class Application:
                 self.out0 = cv2.VideoWriter(self.out0FileName, self.fourcc, 10, (640, 480))
                 time.sleep(0.5)
         elif cam==1: 
-            if (self.recording1): # Stop recording cam 1
+            if (not self.recording1): # Stop recording cam 1
                 self.out1.release()
                 self.end_time1 = time.time()
                 self.recordAVMergeInfo(self.out1FileName, self.frame_counts1, self.start_time1, self.end_time1, 0)
