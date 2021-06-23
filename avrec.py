@@ -318,9 +318,9 @@ class Application:
             self.recording0 = False
             audioDuration = self.audio_thread.stop()
             self.end_time0 = time.time()
-            while threading.active_count() > 1:
-                time.sleep(0.5)
+            while self.audio_thread.audio_thread.is_alive():
                 self.end_time0 = time.time()
+                time.sleep(0.5)
             self.out0.release()
 
             self.recordAVMergeInfo(self.out0FileName, self.frame_counts0, self.start_time0, self.end_time0, audioDuration)
