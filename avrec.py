@@ -273,7 +273,7 @@ class Application:
                 print("SHOW VIDEO: ",self.showVideo)
                 self.showVideo = not self.showVideo
                 self.enableShowLabel.config(text="SHOWING" if self.showVideo else "")
-                self.panel.config(image='', bg="black", fg="white", font=('Helvetica', 20) text=cuteMessages[cmIndex])
+                self.panel.config(image='', bg="black", fg="white", font=('Helvetica', 20), text=cuteMessages[cmIndex])
                 if self.showVideo:
                     cmIndex += 1
                     if cmIndex >= cmLength:
