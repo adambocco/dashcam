@@ -213,7 +213,7 @@ class Application:
                     self.frame_counts0 += 1
                     self.out0.write(frame0)
 
-            if self.showVideo and ok1 and self.curCam == 0:
+            if self.showVideo and ok0 and self.curCam == 0:
                 # convert colors from BGR to RGBA
                 # cv2image = cv2.cvtColor(shownFrame, cv2.COLOR_BGR2RGBA)
                 # cv2image = imutils.resize(cv2image, height=740)
