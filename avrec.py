@@ -346,45 +346,45 @@ def find_camera_indices():
 
 
  def handleToggleSwitches(pba):
-        GPIO.setmode(GPIO.BCM)
-        GPIO.setup(RECORD_FRONT_PIN, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
-        GPIO.setup(RECORD_REAR_PIN, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
-        GPIO.setup(ENABLE_SHOW_PIN, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
-        GPIO.setup(TOGGLE_SHOW_PIN, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+    GPIO.setmode(GPIO.BCM)
+    GPIO.setup(RECORD_FRONT_PIN, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+    GPIO.setup(RECORD_REAR_PIN, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+    GPIO.setup(ENABLE_SHOW_PIN, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+    GPIO.setup(TOGGLE_SHOW_PIN, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
 
 
-        from messages import cuteMessages
-        cmLength = len(cuteMessages)
-        cmIndex = 0
+    from messages import cuteMessages
+    cmLength = len(cuteMessages)
+    cmIndex = 0
 
-        while pba.readGPIO:
-            if (GPIO.input(RECORD_FRONT_PIN) == GPIO.LOW) == pba.recording0:
-                print("RECORD FRONT CHANGED: ",pba.recording0)
-                pba.toggleRecord(0)
-                pba.recording0Label.config(text="REC FRONT" if pba.recording0 else "")
-
-
-            if (GPIO.input(RECORD_REAR_PIN) == GPIO.LOW) == pba.recording1:
-                print("RECORD REAR CHANGED: ",pba.recording1)
-                pba.toggleRecord(1)
-                pba.recording1Label.config(text="REC REAR" if pba.recording1 else "")
+    while pba.readGPIO:
+        if (GPIO.input(RECORD_FRONT_PIN) == GPIO.LOW) == pba.recording0:
+            print("RECORD FRONT CHANGED: ",pba.recording0)
+            pba.toggleRecord(0)
+            pba.recording0Label.config(text="REC FRONT" if pba.recording0 else "")
 
 
-            if (GPIO.input(ENABLE_SHOW_PIN) == GPIO.LOW) == pba.showVideo:
-                print("SHOW VIDEO: ",pba.showVideo)
-                pba.showVideo = not pba.showVideo
-                time.sleep(0.5)
-                pba.enableShowLabel.config(text="SHOWING" if pba.showVideo else "")
-                pba.panel.config(image='', bg="black", fg="white", font=('Helvetica', 30), text=cuteMessages[cmIndex])
-                if pba.showVideo:
-                    cmIndex += 1
-                    if cmIndex >= cmLength:
-                        cmIndex = 0
+        if (GPIO.input(RECORD_REAR_PIN) == GPIO.LOW) == pba.recording1:
+            print("RECORD REAR CHANGED: ",pba.recording1)
+            pba.toggleRecord(1)
+            pba.recording1Label.config(text="REC REAR" if pba.recording1 else "")
 
-            if (GPIO.input(TOGGLE_SHOW_PIN) == GPIO.HIGH) == (pba.curCam == 1):
-                print("RECORD FRONT CHANGED: ",pba.curCam)
-                pba.curCam = 0 if pba.curCam == 1 else 1
-                pba.toggleShowLabel.config(text="REAR" if pba.curCam == 1 else "FRONT")
+
+        if (GPIO.input(ENABLE_SHOW_PIN) == GPIO.LOW) == pba.showVideo:
+            print("SHOW VIDEO: ",pba.showVideo)
+            pba.showVideo = not pba.showVideo
+            time.sleep(0.5)
+            pba.enableShowLabel.config(text="SHOWING" if pba.showVideo else "")
+            pba.panel.config(image='', bg="black", fg="white", font=('Helvetica', 30), text=cuteMessages[cmIndex])
+            if pba.showVideo:
+                cmIndex += 1
+                if cmIndex >= cmLength:
+                    cmIndex = 0
+
+        if (GPIO.input(TOGGLE_SHOW_PIN) == GPIO.HIGH) == (pba.curCam == 1):
+            print("RECORD FRONT CHANGED: ",pba.curCam)
+            pba.curCam = 0 if pba.curCam == 1 else 1
+            pba.toggleShowLabel.config(text="REAR" if pba.curCam == 1 else "FRONT")
 
 
 
