@@ -185,8 +185,11 @@ class Application:
 
         self.recordingLock = False
 
-        self.thr = threading.Thread(target=self.video_loop, args=())
+        self.thr = threading.Thread(target=self.video_loop1, args=())
         self.thr.start()
+
+        self.thr2 = threading.Thread(target=self.video_loop2, args=())
+        self.thr2.start()
 
         # self.root.after(self.loopInterval, self.video_loop)
         
@@ -199,28 +202,49 @@ class Application:
         self.fullScreenState = False
         self.root.attributes("-fullscreen", self.fullScreenState)
 
-    def video_loop(self):
+    def video_loop1(self):
         while True:
             """ Get frame from the video stream and show it in Tkinter """
 
             ok0, frame0 = self.vs0.read()  # read frame from video stream
-            ok1, frame1 = self.vs1.read()  # read frame from video stream
-            shownFrame = frame0 if self.curCam == 0 else frame1
-            shownOk = ok0 if self.curCam == 0 else ok1
+
             if not self.recordingLock:
                 if ok0 and self.recording0:  # frame captured without any errors
                     self.frame_counts0 += 1
                     self.out0.write(frame0)
-                if ok1 and self.recording1:
-                    self.frame_counts1 += 1
-                    self.out1.write(frame1)
-            if self.showVideo and shownOk:
+
+            if self.showVideo and ok1 and self.curCam == 0:
                 # convert colors from BGR to RGBA
                 # cv2image = cv2.cvtColor(shownFrame, cv2.COLOR_BGR2RGBA)
                 # cv2image = imutils.resize(cv2image, height=740)
 
                 # convert image for tkinter
-                imgtk = ImageTk.PhotoImage(image=Image.fromarray(shownFrame))
+                imgtk = ImageTk.PhotoImage(image=Image.fromarray(frame0))
+                self.panel.config(image=imgtk)  # show the image
+                self.panel.imgtk = imgtk  # anchor imgtk so it does not be deleted by garbage-collector
+            
+        # call the same function after {self.loopInterval} milliseconds
+        # self.root.after(self.loopInterval, self.video_loop)
+
+
+    def video_loop2(self):
+        while True:
+            """ Get frame from the video stream and show it in Tkinter """
+
+            ok1, frame1 = self.vs1.read()  # read frame from video stream
+
+            if not self.recordingLock:
+
+                if ok1 and self.recording1:
+                    self.frame_counts1 += 1
+                    self.out1.write(frame1)
+            if self.showVideo and ok1 and self.curCam == 1:
+                # convert colors from BGR to RGBA
+                # cv2image = cv2.cvtColor(shownFrame, cv2.COLOR_BGR2RGBA)
+                # cv2image = imutils.resize(cv2image, height=740)
+
+                # convert image for tkinter
+                imgtk = ImageTk.PhotoImage(image=Image.fromarray(frame1))
                 self.panel.config(image=imgtk)  # show the image
                 self.panel.imgtk = imgtk  # anchor imgtk so it does not be deleted by garbage-collector
             
