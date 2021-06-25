@@ -203,15 +203,6 @@ class Application:
         # self.video_loop()
         self.thr = threading.Thread(target=self.video_loop, args=())
         self.thr.start()
-
-        GPIO.setmode(GPIO.BCM)
-        GPIO.setup(RECORD_FRONT_PIN, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
-        GPIO.setup(RECORD_REAR_PIN, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
-        GPIO.setup(ENABLE_SHOW_PIN, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
-        GPIO.setup(TOGGLE_SHOW_PIN, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
-
-        # self.gpioThread = threading.Thread(target=self.handleToggleSwitches, args=())
-        # self.gpioThread.start()
         
         
     def toggleFullScreen(self, event):
@@ -250,40 +241,7 @@ class Application:
         # call the same function after {self.loopInterval} milliseconds
         # self.root.after(self.loopInterval, self.video_loop)
 
-    def handleToggleSwitches(self):
-
-
-        from messages import cuteMessages
-        cmLength = len(cuteMessages)
-        cmIndex = 0
-
-        while self.readGPIO:
-            if (GPIO.input(RECORD_FRONT_PIN) == GPIO.LOW) == self.recording0:
-                print("RECORD FRONT CHANGED: ",self.recording0)
-                self.toggleRecord(0)
-                self.recording0Label.config(text="REC FRONT" if self.recording0 else "")
-
-            if (GPIO.input(RECORD_REAR_PIN) == GPIO.LOW) == self.recording1:
-                print("RECORD REAR CHANGED: ",self.recording1)
-                self.toggleRecord(1)
-                self.recording1Label.config(text="REC REAR" if self.recording1 else "")
-
-            if (GPIO.input(ENABLE_SHOW_PIN) == GPIO.LOW) == self.showVideo:
-                print("SHOW VIDEO: ",self.showVideo)
-                self.showVideo = not self.showVideo
-                time.sleep(0.5)
-                self.enableShowLabel.config(text="SHOWING" if self.showVideo else "")
-                self.panel.config(image='', bg="black", fg="white", font=('Helvetica', 30), text=cuteMessages[cmIndex])
-                if self.showVideo:
-                    cmIndex += 1
-                    if cmIndex >= cmLength:
-                        cmIndex = 0
-
-            if (GPIO.input(TOGGLE_SHOW_PIN) == GPIO.HIGH) == (self.curCam == 1):
-                print("RECORD FRONT CHANGED: ",self.curCam)
-                self.curCam = 0 if self.curCam == 1 else 1
-                self.toggleShowLabel.config(text="REAR" if self.curCam == 1 else "FRONT")
-
+    
 
     def toggleRecord(self,cam):
         datetimeStamp = datetime.now().strftime("%d-%m-%Y-%H-%M")
@@ -385,7 +343,54 @@ def find_camera_indices():
     return valid_cams
 
 
+
+
+ def handleToggleSwitches(pba):
+        GPIO.setmode(GPIO.BCM)
+        GPIO.setup(RECORD_FRONT_PIN, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+        GPIO.setup(RECORD_REAR_PIN, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+        GPIO.setup(ENABLE_SHOW_PIN, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+        GPIO.setup(TOGGLE_SHOW_PIN, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+
+
+        from messages import cuteMessages
+        cmLength = len(cuteMessages)
+        cmIndex = 0
+
+        while pba.readGPIO:
+            if (GPIO.input(RECORD_FRONT_PIN) == GPIO.LOW) == pba.recording0:
+                print("RECORD FRONT CHANGED: ",pba.recording0)
+                pba.toggleRecord(0)
+                pba.recording0Label.config(text="REC FRONT" if pba.recording0 else "")
+
+
+            if (GPIO.input(RECORD_REAR_PIN) == GPIO.LOW) == pba.recording1:
+                print("RECORD REAR CHANGED: ",pba.recording1)
+                pba.toggleRecord(1)
+                pba.recording1Label.config(text="REC REAR" if pba.recording1 else "")
+
+
+            if (GPIO.input(ENABLE_SHOW_PIN) == GPIO.LOW) == pba.showVideo:
+                print("SHOW VIDEO: ",pba.showVideo)
+                pba.showVideo = not pba.showVideo
+                time.sleep(0.5)
+                pba.enableShowLabel.config(text="SHOWING" if pba.showVideo else "")
+                pba.panel.config(image='', bg="black", fg="white", font=('Helvetica', 30), text=cuteMessages[cmIndex])
+                if pba.showVideo:
+                    cmIndex += 1
+                    if cmIndex >= cmLength:
+                        cmIndex = 0
+
+            if (GPIO.input(TOGGLE_SHOW_PIN) == GPIO.HIGH) == (pba.curCam == 1):
+                print("RECORD FRONT CHANGED: ",pba.curCam)
+                pba.curCam = 0 if pba.curCam == 1 else 1
+                pba.toggleShowLabel.config(text="REAR" if pba.curCam == 1 else "FRONT")
+
+
+
 if __name__ == "__main__":
     pba = Application()
+    self.gpioThread = threading.Thread(target=handleToggleSwitches, args=(pba))
+    self.gpioThread.start()
     pba.root.mainloop()
     exit()
