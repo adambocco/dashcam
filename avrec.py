@@ -257,6 +257,7 @@ class Application:
         cmIndex = 0
 
         while self.readGPIO:
+            time.sleep(1)
             if (GPIO.input(RECORD_FRONT_PIN) == GPIO.LOW) == self.recording0:
                 print("RECORD FRONT CHANGED: ",self.recording0)
                 self.toggleRecord(0)
