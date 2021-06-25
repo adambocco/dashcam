@@ -204,8 +204,14 @@ class Application:
         self.thr = threading.Thread(target=self.video_loop, args=())
         self.thr.start()
 
-        self.gpioThread = threading.Thread(target=self.handleToggleSwitches, args=())
-        self.gpioThread.start()
+        GPIO.setmode(GPIO.BCM)
+        GPIO.setup(RECORD_FRONT_PIN, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+        GPIO.setup(RECORD_REAR_PIN, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+        GPIO.setup(ENABLE_SHOW_PIN, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+        GPIO.setup(TOGGLE_SHOW_PIN, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+
+        # self.gpioThread = threading.Thread(target=self.handleToggleSwitches, args=())
+        # self.gpioThread.start()
         
         
     def toggleFullScreen(self, event):
@@ -245,46 +251,38 @@ class Application:
         # self.root.after(self.loopInterval, self.video_loop)
 
     def handleToggleSwitches(self):
-        GPIO.setmode(GPIO.BCM)
-        GPIO.setup(RECORD_FRONT_PIN, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
-        GPIO.setup(RECORD_REAR_PIN, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
-        GPIO.setup(ENABLE_SHOW_PIN, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
-        GPIO.setup(TOGGLE_SHOW_PIN, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
 
 
         from messages import cuteMessages
         cmLength = len(cuteMessages)
         cmIndex = 0
 
-        # while self.readGPIO:
-        #     if (GPIO.input(RECORD_FRONT_PIN) == GPIO.LOW) == self.recording0:
-        #         print("RECORD FRONT CHANGED: ",self.recording0)
-        #         self.toggleRecord(0)
-        #         self.recording0Label.config(text="REC FRONT" if self.recording0 else "")
+        while self.readGPIO:
+            if (GPIO.input(RECORD_FRONT_PIN) == GPIO.LOW) == self.recording0:
+                print("RECORD FRONT CHANGED: ",self.recording0)
+                self.toggleRecord(0)
+                self.recording0Label.config(text="REC FRONT" if self.recording0 else "")
 
+            if (GPIO.input(RECORD_REAR_PIN) == GPIO.LOW) == self.recording1:
+                print("RECORD REAR CHANGED: ",self.recording1)
+                self.toggleRecord(1)
+                self.recording1Label.config(text="REC REAR" if self.recording1 else "")
 
-        #     if (GPIO.input(RECORD_REAR_PIN) == GPIO.LOW) == self.recording1:
-        #         print("RECORD REAR CHANGED: ",self.recording1)
-        #         self.toggleRecord(1)
-        #         self.recording1Label.config(text="REC REAR" if self.recording1 else "")
+            if (GPIO.input(ENABLE_SHOW_PIN) == GPIO.LOW) == self.showVideo:
+                print("SHOW VIDEO: ",self.showVideo)
+                self.showVideo = not self.showVideo
+                time.sleep(0.5)
+                self.enableShowLabel.config(text="SHOWING" if self.showVideo else "")
+                self.panel.config(image='', bg="black", fg="white", font=('Helvetica', 30), text=cuteMessages[cmIndex])
+                if self.showVideo:
+                    cmIndex += 1
+                    if cmIndex >= cmLength:
+                        cmIndex = 0
 
-
-        #     if (GPIO.input(ENABLE_SHOW_PIN) == GPIO.LOW) == self.showVideo:
-        #         print("SHOW VIDEO: ",self.showVideo)
-        #         self.showVideo = not self.showVideo
-        #         time.sleep(0.5)
-        #         self.enableShowLabel.config(text="SHOWING" if self.showVideo else "")
-        #         self.panel.config(image='', bg="black", fg="white", font=('Helvetica', 30), text=cuteMessages[cmIndex])
-        #         if self.showVideo:
-        #             cmIndex += 1
-        #             if cmIndex >= cmLength:
-        #                 cmIndex = 0
-
-
-        #     if (GPIO.input(TOGGLE_SHOW_PIN) == GPIO.HIGH) == (self.curCam == 1):
-        #         print("RECORD FRONT CHANGED: ",self.curCam)
-        #         self.curCam = 0 if self.curCam == 1 else 1
-        #         self.toggleShowLabel.config(text="REAR" if self.curCam == 1 else "FRONT")
+            if (GPIO.input(TOGGLE_SHOW_PIN) == GPIO.HIGH) == (self.curCam == 1):
+                print("RECORD FRONT CHANGED: ",self.curCam)
+                self.curCam = 0 if self.curCam == 1 else 1
+                self.toggleShowLabel.config(text="REAR" if self.curCam == 1 else "FRONT")
 
 
     def toggleRecord(self,cam):
