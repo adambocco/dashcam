@@ -345,7 +345,7 @@ def find_camera_indices():
 
 
 
- def handleToggleSwitches(pba):
+def handleToggleSwitches(pba):
     GPIO.setmode(GPIO.BCM)
     GPIO.setup(RECORD_FRONT_PIN, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
     GPIO.setup(RECORD_REAR_PIN, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
