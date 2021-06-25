@@ -184,25 +184,11 @@ class Application:
         self.toggleShowLabel.grid(row=0, column=4)
 
         self.recordingLock = False
-        # self.switchBut = tk.Button(self.root, font=BUTTON_FONT,activebackground=BUTTON_ACTIVE_BG,  text="REAR", anchor="w", bg=BUTTON_BG,height=BTN_HEIGHT)
-        # self.switchBut.grid(row=1, column=0)
-        # self.switchBut.configure(command=self.switchCam)
 
-        # self.toggleRecordBut0 = tk.Button(self.root,font=BUTTON_FONT, text="REC 0",fg="black", activebackground=BUTTON_ACTIVE_BG, bg=BUTTON_BG,height=BTN_HEIGHT)
-        # self.toggleRecordBut0.grid(row=2, column=0)
-        # self.toggleRecordBut0.configure(command=lambda:self.toggleRecord(0))
+        # self.thr = threading.Thread(target=self.video_loop, args=())
+        # self.thr.start()
 
-        # self.toggleRecordBut1 = tk.Button(self.root,font=BUTTON_FONT, text="REC 1",fg="black", activebackground=BUTTON_ACTIVE_BG, bg=BUTTON_BG,height=BTN_HEIGHT)
-        # self.toggleRecordBut1.grid(row=3, column=0)
-        # self.toggleRecordBut1.configure(command= lambda:self.toggleRecord(1))
-
-        # self.toggleShowVideoBut = tk.Button(self.root,font=BUTTON_FONT, text="HIDE", activebackground=BUTTON_ACTIVE_BG, bg=BUTTON_BG,height=BTN_HEIGHT)
-        # self.toggleShowVideoBut.grid(row=4, column=0)
-        # self.toggleShowVideoBut.configure(command=self.toggleShowVideo)
-
-        # self.video_loop()
-        self.thr = threading.Thread(target=self.video_loop, args=())
-        self.thr.start()
+        self.root.after(self.loopInterval, self.video_loop)
         
         
     def toggleFullScreen(self, event):
@@ -214,32 +200,32 @@ class Application:
         self.root.attributes("-fullscreen", self.fullScreenState)
 
     def video_loop(self):
-        while True:
-            """ Get frame from the video stream and show it in Tkinter """
 
-            ok0, frame0 = self.vs0.read()  # read frame from video stream
-            ok1, frame1 = self.vs1.read()  # read frame from video stream
-            shownFrame = frame0 if self.curCam == 0 else frame1
-            shownOk = ok0 if self.curCam == 0 else ok1
-            if not self.recordingLock:
-                if ok0 and self.recording0:  # frame captured without any errors
-                    self.frame_counts0 += 1
-                    self.out0.write(frame0)
-                if ok1 and self.recording1:
-                    self.frame_counts1 += 1
-                    self.out1.write(frame1)
-            if self.showVideo and shownOk:
-                # convert colors from BGR to RGBA
-                cv2image = cv2.cvtColor(shownFrame, cv2.COLOR_BGR2RGBA)
-                cv2image = imutils.resize(cv2image, width=1024)
+        """ Get frame from the video stream and show it in Tkinter """
 
-                # convert image for tkinter
-                imgtk = ImageTk.PhotoImage(image=Image.fromarray(cv2image))
-                self.panel.config(image=imgtk, bg=BG)  # show the image
-                self.panel.imgtk = imgtk  # anchor imgtk so it does not be deleted by garbage-collector
+        ok0, frame0 = self.vs0.read()  # read frame from video stream
+        ok1, frame1 = self.vs1.read()  # read frame from video stream
+        shownFrame = frame0 if self.curCam == 0 else frame1
+        shownOk = ok0 if self.curCam == 0 else ok1
+        if not self.recordingLock:
+            if ok0 and self.recording0:  # frame captured without any errors
+                self.frame_counts0 += 1
+                self.out0.write(frame0)
+            if ok1 and self.recording1:
+                self.frame_counts1 += 1
+                self.out1.write(frame1)
+        if self.showVideo and shownOk:
+            # convert colors from BGR to RGBA
+            cv2image = cv2.cvtColor(shownFrame, cv2.COLOR_BGR2RGBA)
+            # cv2image = imutils.resize(cv2image, height=740)
+
+            # convert image for tkinter
+            imgtk = ImageTk.PhotoImage(image=Image.fromarray(cv2image))
+            self.panel.config(image=imgtk, bg=BG)  # show the image
+            self.panel.imgtk = imgtk  # anchor imgtk so it does not be deleted by garbage-collector
         
         # call the same function after {self.loopInterval} milliseconds
-        # self.root.after(self.loopInterval, self.video_loop)
+        self.root.after(self.loopInterval, self.video_loop)
 
     
 
