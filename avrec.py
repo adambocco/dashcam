@@ -376,7 +376,7 @@ def handleToggleSwitches(pba):
 
 if __name__ == "__main__":
     pba = Application()
-    gpioThread = threading.Thread(target=handleToggleSwitches, args=(pba))
+    gpioThread = threading.Thread(target=handleToggleSwitches, args=(pba,))
     gpioThread.start()
     pba.root.mainloop()
     exit()
