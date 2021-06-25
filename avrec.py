@@ -220,8 +220,8 @@ class Application:
             # cv2image = imutils.resize(cv2image, height=740)
 
             # convert image for tkinter
-            imgtk = ImageTk.PhotoImage(image=Image.fromarray(cv2image))
-            self.panel.config(image=imgtk, bg=BG)  # show the image
+            imgtk = ImageTk.PhotoImage(image=Image.fromarray(shownFrame))
+            self.panel.config(image=imgtk)  # show the image
             self.panel.imgtk = imgtk  # anchor imgtk so it does not be deleted by garbage-collector
         
         # call the same function after {self.loopInterval} milliseconds
