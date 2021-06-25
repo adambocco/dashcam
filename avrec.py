@@ -139,7 +139,7 @@ class Application:
         self.out0 = None
         self.out1 = None
         
-        self.vs0.set(cv2.CAP_PROP_BRIGHTNESS,70)
+        self.vs0.set(cv2.CAP_PROP_BRIGHTNESS,50)
         
         self.vs1.set(cv2.CAP_PROP_BRIGHTNESS, 70)
 
