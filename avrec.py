@@ -389,8 +389,8 @@ def handleToggleSwitches(pba):
             pba.enableShowLabel.config(text="SHOWING" if pba.showVideo else "")
             if cmLength == cmIndex:
                 im = Image.open('./gabby1.jpg')
-                im = im.resize((640, 480))
-                im = im.rotate(200)
+                im = im.resize((580, 440))
+                im = im.rotate(240)
                 img = ImageTk.PhotoImage(im)
                 pba.panel.config(image=img, bg="black")
             else:   
