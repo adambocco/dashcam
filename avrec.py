@@ -22,13 +22,14 @@ BG = "black"
 BUTTON_BG = "#eeffee"
 BUTTON_ACTIVE_BG="#ccddff"
 BUTTON_FONT = ("Helvetica", 10, "bold")
-LABEL_FONT = ("Helvetica", 10, "bold")
+LABEL_FONT = ("Cascadia Mono", 10, "bold")
 BTN_HEIGHT = 1
 
 RECORD_FRONT_PIN = 17
 RECORD_REAR_PIN = 27
 ENABLE_SHOW_PIN = 22
 TOGGLE_SHOW_PIN = 23
+OTHER_PIN = 24
 
 GPIO.setwarnings(False)
 GPIO.setmode(GPIO.BCM)
@@ -36,6 +37,7 @@ GPIO.setup(RECORD_FRONT_PIN, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
 GPIO.setup(RECORD_REAR_PIN, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
 GPIO.setup(ENABLE_SHOW_PIN, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
 GPIO.setup(TOGGLE_SHOW_PIN, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+GPIO.setup(OTHER_PIN, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
 
 
 
@@ -273,6 +275,7 @@ class Application:
                 print("stopped recording front")
                 
             else: # Start recording cam 0
+                print("Now recording cam 0")
                 self.start_audio_recording("./DASH0-Audio/"+datetimeStamp)
                 self.start_time0 = time.time()
                 self.out0FileName = "./DASH0-Video/"+datetimeStamp+".avi"
@@ -287,6 +290,7 @@ class Application:
                 self.recordAVMergeInfo(self.out1FileName, self.frame_counts1, self.start_time1, self.end_time1, 0)
                 self.frame_counts1 = 1
             else: # Start recording cam 1
+                print("Now recording cam 1")
                 self.start_time1 = time.time()
                 self.out1FileName = "./DASH1-Video/"+datetimeStamp+".avi"
                 self.out1 = cv2.VideoWriter(self.out1FileName, self.fourcc, 10, (640, 480))
@@ -362,6 +366,7 @@ def handleToggleSwitches(pba):
     GPIO.setup(RECORD_REAR_PIN, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
     GPIO.setup(ENABLE_SHOW_PIN, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
     GPIO.setup(TOGGLE_SHOW_PIN, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+    GPIO.setup(OTHER_PIN, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
 
 
     from messages import cuteMessages
@@ -388,10 +393,12 @@ def handleToggleSwitches(pba):
             pba.enableShowLabel.config(text="SHOWING" if pba.showVideo else "")
             if cmLength == cmIndex:
                 im = Image.open('./gabby1.jpg')
+                im = im.resize((640, 480))
+                im = im.rotate(45)
                 img = ImageTk.PhotoImage(im)
                 pba.panel.config(image=img, bg="black")
             else:   
-                pba.panel.config(image='', bg="black", fg="white", font=('Helvetica', 30), text=cuteMessages[cmIndex])
+                pba.panel.config(image='', bg="black", fg="white", font=('Helvetica', 30), text=makeLineBreaks(cuteMessages[cmIndex]))
             if pba.showVideo:
                 cmIndex += 1
                 if cmIndex > cmLength:
@@ -403,6 +410,19 @@ def handleToggleSwitches(pba):
             pba.toggleShowLabel.config(text="REAR" if pba.curCam == 1 else "FRONT")
 
 
+def makeLineBreaks(stringToBreak, breakIndex):
+    strBuilder = ""
+    ret = ""
+    strArr = stringToBreak.split(' ')
+    for word in strArr:
+        if len(strBuilder) + len(word) > breakIndex:
+            ret += strBuilder + "\n"
+            strBuilder = ""
+        else:
+            strBuilder += word + " "
+    return ret
+
+    
 
 if __name__ == "__main__":
     pba = Application()
