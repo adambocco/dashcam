@@ -304,7 +304,6 @@ class Application:
     def destructor(self):
         print("CLEANING UP GPIOs")
         self.readGPIO = False
-        GPIO.cleanup()
         
         if (self.recording0): # Stop recording cam 0
             self.recording0 = False
@@ -328,6 +327,8 @@ class Application:
         except (NameError, AttributeError) as e:
             print("No audio thread started")
         
+
+        GPIO.cleanup()
         self.root.destroy()
         self.vs0.release()  # release web camera 0
         self.vs1.release()  # release web camera 1
@@ -385,10 +386,15 @@ def handleToggleSwitches(pba):
             pba.showVideo = not pba.showVideo
             time.sleep(0.5)
             pba.enableShowLabel.config(text="SHOWING" if pba.showVideo else "")
-            pba.panel.config(image='', bg="black", fg="white", font=('Helvetica', 30), text=cuteMessages[cmIndex])
+            if cmLength == cmIndex:
+                im = Image.open('./gabby1.jpg')
+                img = ImageTk.PhotoImage(im)
+                pba.panel.config(image=img, bg="black")
+            else:   
+                pba.panel.config(image='', bg="black", fg="white", font=('Helvetica', 30), text=cuteMessages[cmIndex])
             if pba.showVideo:
                 cmIndex += 1
-                if cmIndex >= cmLength:
+                if cmIndex > cmLength:
                     cmIndex = 0
 
         if (GPIO.input(TOGGLE_SHOW_PIN) == GPIO.HIGH) == (pba.curCam == 1):
