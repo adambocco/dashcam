@@ -262,11 +262,7 @@ class Application:
             self.recording0 = not self.recording0
             if (not self.recording0): # Stop recording cam 0
                 audioDuration = self.audio_thread.stop()
-                while self.audio_thread.audio_thread.is_alive():
-                    print("Audio thread still alive")
-                    time.sleep(1)
-                print("Here 1")
-
+                time.sleep(1)
                 self.end_time0 = time.time()
                 self.out0.release()
                 self.recordAVMergeInfo(self.out0FileName, self.frame_counts0, self.start_time0, self.end_time0, audioDuration)
@@ -420,6 +416,7 @@ def makeLineBreaks(stringToBreak, breakIndex):
             strBuilder = ""
         else:
             strBuilder += word + " "
+    ret += strBuilder
     return ret
 
     
