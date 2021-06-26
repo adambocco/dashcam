@@ -398,7 +398,7 @@ def handleToggleSwitches(pba):
                 img = ImageTk.PhotoImage(im)
                 pba.panel.config(image=img, bg="black")
             else:   
-                pba.panel.config(image='', bg="black", fg="white", font=('Helvetica', 30), text=makeLineBreaks(cuteMessages[cmIndex]))
+                pba.panel.config(image='', bg="black", fg="white", font=('Helvetica', 30), text=makeLineBreaks(cuteMessages[cmIndex],30))
             if pba.showVideo:
                 cmIndex += 1
                 if cmIndex > cmLength:
