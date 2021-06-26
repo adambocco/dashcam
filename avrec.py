@@ -390,7 +390,7 @@ def handleToggleSwitches(pba):
             if cmLength == cmIndex:
                 im = Image.open('./gabby1.jpg')
                 im = im.resize((640, 480))
-                im = im.rotate(45)
+                im = im.rotate(200)
                 img = ImageTk.PhotoImage(im)
                 pba.panel.config(image=img, bg="black")
             else:   
@@ -413,7 +413,7 @@ def makeLineBreaks(stringToBreak, breakIndex):
     for word in strArr:
         if len(strBuilder) + len(word) > breakIndex:
             ret += strBuilder + "\n"
-            strBuilder = ""
+            strBuilder = word + " "
         else:
             strBuilder += word + " "
     ret += strBuilder
