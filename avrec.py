@@ -131,7 +131,7 @@ class Application:
         self.start_time1 = None
         self.end_time0 = None
         self.end_time1 = None
-        self.loopInterval = 12
+        self.loopInterval = 5
         self.defaultScreenText = "Baked\nBeans" # Text on screen when not streaming
         self.curCam = 1 # Currently streaming
         # capture video frames, 0 is your default video camera
@@ -423,7 +423,7 @@ def handlePiCamera(pba):
             print("Can't stop preview")
 
 def startPiCameraPreview(pba):
-    pba.picam.start_preview(fullscreen=False, window=(0, 50, 1250, 670))
+    pba.picam.start_preview(fullscreen=False, window=(-30, 50, 1280, 690))
     
 
 def makeLineBreaks(stringToBreak, breakIndex):
