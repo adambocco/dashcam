@@ -197,7 +197,7 @@ class Application:
         # self.thr2.start()
 
 
-        self.root.after(self.loopInterval, self.video_loop1)
+        self.root.after(self.loopInterval, self.video_loop2)
         
         
     def toggleFullScreen(self, event):
@@ -230,7 +230,7 @@ class Application:
             self.panel.imgtk = imgtk  # anchor imgtk so it does not be deleted by garbage-collector
             
         # call the same function after {self.loopInterval} milliseconds
-        self.root.after(self.loopInterval, self.video_loop1)
+        self.root.after(self.loopInterval, self.video_loop2)
 
 
     def video_loop2(self):
