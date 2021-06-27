@@ -255,7 +255,7 @@ class Application:
             self.panel.imgtk = imgtk  # anchor imgtk so it does not be deleted by garbage-collector
             
         # call the same function after {self.loopInterval} milliseconds
-        self.handleToggleSwitches(self)
+        handleToggleSwitches(self)
         self.root.after(self.loopInterval, self.video_loop2)
 
     
