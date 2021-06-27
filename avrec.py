@@ -377,8 +377,13 @@ class Application:
                     cmIndex += 1
                     if cmIndex > cmLength:
                         cmIndex = 0
+                else:
+                    try:
+                        self.picam.stop_preview()
+                    except:
+                        pass
 
-            if (GPIO.input(TOGGLE_SHOW_PIN) == GPIO.HIGH) == (self.curCam == 1):
+            if (GPIO.input(TOGGLE_SHOW_PIN) == GPIO.HIGH) == (self.curCam == 0):
                 print("RECORD FRONT CHANGED: ",self.curCam)
                 self.curCam = 0 if self.curCam == 1 else 1
                 self.handlePiCamera()
