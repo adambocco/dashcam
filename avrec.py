@@ -12,11 +12,12 @@ import argparse
 import datetime
 import re
 import urllib
-import RPi.GPIO as GPIO
 from picamera import PiCamera
 import imutils
 from datetime import datetime
 import RPi.GPIO as GPIO
+
+MAIN_WINDOW_GEOMETRY = '1280x720'
 
 BG = "black"
 BUTTON_BG = "#eeffee"
@@ -85,12 +86,10 @@ class AudioRecorder():
     def stop(self):
 
         if self.open == True:
-            print("Stopping audio thread!")
             self.open = False
             time.sleep(0.5)
             self.stream.stop_stream()
             self.stream.close()
-            print("Audio stream closed")
             self.audio.terminate()
             self.endTime = time.time()
             self.duration = self.endTime - self.startTime
@@ -101,7 +100,6 @@ class AudioRecorder():
             waveFile.setframerate(self.rate)
             waveFile.writeframes(b''.join(self.audio_frames)) # Audio write out at this point
             waveFile.close()
-            print("Wrote audio")
         time.sleep(0.5)
         return self.duration
 
@@ -117,52 +115,47 @@ class Application:
     def __init__(self, output_path="./"):
         # Variables set to none are initialized in toggleRecord()
         camindices = find_camera_indices()
-        self.cam0Index = camindices[1]
-        self.cam1Index = camindices[0]
+        self.camIndexUSB = camindices[0]
+
 
         self.picam = PiCamera()
-
         self.showVideo = True # Stop rendering in tkinter to improve recording performance
-        self.recording0 = False
-        self.recording1 = False
-        self.frame_counts0 = 1
-        self.frame_counts1 = 1
-        self.start_time0 = None
-        self.start_time1 = None
-        self.end_time0 = None
-        self.end_time1 = None
+
+        self.recordingPiCam = False
+        self.recordingUSB = False
+
+        self.frameCountsUSB = 1
+
+        self.startTimeUSB = None
+        self.endTimeUSB = None
+
         self.loopInterval = 20
-        self.defaultScreenText = "Baked\nBeans" # Text on screen when not streaming
-        self.curCam = 1 # Currently streaming
+
+        self.curCam = 0 # Currently streaming
         # capture video frames, 0 is your default video camera
-        self.vs0 = cv2.VideoCapture(self.cam0Index)
-        # "ls /dev/video*" to see available
-        self.vs1 = cv2.VideoCapture(self.cam1Index)
+        self.streamUSB = cv2.VideoCapture(self.camIndexUSB)
+
         self.fourcc = cv2.VideoWriter_fourcc(*"MJPG")
-        self.out0FileName = None
-        self.out1FileName = None
-        self.out0 = None
-        self.out1 = None
+        self.outFileNamePiCam = None
+        self.outFileNameUSB = None
+        self.outPiCam = None
+        self.outUSB = None
         
-        self.vs0.set(cv2.CAP_PROP_BRIGHTNESS,50)
-        
-        self.vs1.set(cv2.CAP_PROP_BRIGHTNESS, 70)
+        self.streamUSB.set(cv2.CAP_PROP_BRIGHTNESS,50)
 
         self.current_image = None  # current image from the camera
         self.root = tk.Tk()  # initialize root window
-        self.root.attributes('-fullscreen', True)  
-        self.fullScreenState = False
+        self.fullScreenState = True
+        self.root.attributes('-fullscreen', self.fullScreenState)  
         self.root.bind("<F11>", self.toggleFullScreen)
         self.root.bind("<Escape>", self.quitFullScreen)
         # These are compatible with 3.5inch 480, 320 display
-        w = 1280  # width for the Tk root
-        h = 720  # height for the Tk root
+
         self.root.resizable(0, 0)
-        ws = self.root .winfo_screenwidth()  # width of the screen
-        hs = self.root .winfo_screenheight()  # height of the screen
-        x = (ws/2) - (w/2)
-        y = (hs/2) - (h/2)
-        self.root.geometry('1280x720')
+        # w = self.root .winfo_screenwidth()  # width of the screen
+        # h = self.root .winfo_screenheight()  # height of the screen
+
+        self.root.geometry(MAIN_WINDOW_GEOMETRY)
         # set window title
         self.root.title("DASHCAM")
         self.root.protocol('WM_DELETE_WINDOW', self.destructor)
@@ -171,16 +164,17 @@ class Application:
         self.panel = tk.Label(self.root, bg=BG)  # initialize image panel
         self.panel.grid(row=1, column=0, columnspan=6)
 
+        self.recordingLock = False
         self.readGPIO = True
 
         self.botQuit = tk.Button(self.root, font=BUTTON_FONT, text="EXIT", bg="#ffafaf", activebackground=BUTTON_ACTIVE_BG,height=BTN_HEIGHT, command=self.destructor)
         self.botQuit.grid(row=0, column=0)
 
-        self.recording0Label = tk.Label(self.root, bg="black", fg="white", font=LABEL_FONT, text="REC FRONT" if GPIO.input(RECORD_FRONT_PIN)==GPIO.HIGH else "")
-        self.recording0Label.grid(row=0, column=1)
+        self.recordingLabelUSB = tk.Label(self.root, bg="black", fg="white", font=LABEL_FONT, text="REC FRONT" if GPIO.input(RECORD_FRONT_PIN)==GPIO.HIGH else "")
+        self.recordingLabelUSB.grid(row=0, column=1)
 
-        self.recording1Label = tk.Label(self.root, bg="black", fg="white", font=LABEL_FONT, text="REC REAR" if GPIO.input(RECORD_REAR_PIN)==GPIO.HIGH else "")
-        self.recording1Label.grid(row=0, column=2)
+        self.recordingLabelPiCam = tk.Label(self.root, bg="black", fg="white", font=LABEL_FONT, text="REC REAR" if GPIO.input(RECORD_REAR_PIN)==GPIO.HIGH else "")
+        self.recordingLabelPiCam.grid(row=0, column=2)
 
         self.enableShowLabel = tk.Label(self.root, bg="black", fg="white", font=LABEL_FONT, text="SHOWING" if GPIO.input(ENABLE_SHOW_PIN)==GPIO.HIGH else "")
         self.enableShowLabel.grid(row=0, column=3)
@@ -188,17 +182,13 @@ class Application:
         self.toggleShowLabel = tk.Label(self.root, bg="black", fg="white", font=LABEL_FONT, text="REAR" if GPIO.input(TOGGLE_SHOW_PIN)==GPIO.HIGH else "FRONT")
         self.toggleShowLabel.grid(row=0, column=4)
 
-        self.recordingLock = False
-
         # self.thr = threading.Thread(target=self.video_loop1, args=())
         # self.thr.start()
 
         # self.thr2 = threading.Thread(target=self.video_loop2, args=())
         # self.thr2.start()
 
-
-        self.root.after(self.loopInterval, self.video_loop2)
-        
+        self.root.after(self.loopInterval, self.videoLoopUSB)
         
     def toggleFullScreen(self, event):
         self.fullScreenState = not self.fullScreenState
@@ -208,45 +198,44 @@ class Application:
         self.fullScreenState = False
         self.root.attributes("-fullscreen", self.fullScreenState)
 
-    def video_loop1(self):
+    # def video_loop1(self):
 
-        """ Get frame from the video stream and show it in Tkinter """
+    #     """ Get frame from the video stream and show it in Tkinter """
 
-        ok0, frame0 = self.vs0.read()  # read frame from video stream
+    #     ok0, frame0 = self.vs0.read()  # read frame from video stream
+
+    #     if not self.recordingLock:
+    #         if ok0 and self.recording0:  # frame captured without any errors
+    #             self.frameCountsUSB += 1
+    #             self.out.write(frame0)
+
+    #     if self.showVideo and ok0 and self.curCam == 0:
+    #         # convert colors from BGR to RGBA
+    #         cv2image = cv2.cvtColor(frame0, cv2.COLOR_BGR2RGBA)
+    #         # cv2image = imutils.resize(cv2image, height=740)
+
+    #         # convert image for tkinter
+    #         imgtk = ImageTk.PhotoImage(image=Image.fromarray(frame0))
+    #         self.panel.config(image=imgtk)  # show the image
+    #         self.panel.imgtk = imgtk  # anchor imgtk so it does not be deleted by garbage-collector
+            
+    #     # call the same function after {self.loopInterval} milliseconds
+    #     self.root.after(self.loopInterval, self.video_loop1)
+
+
+    def videoLoopUSB(self):
+
+        frameOK, frame = self.streamUSB.read()  # read frame from video stream
 
         if not self.recordingLock:
-            if ok0 and self.recording0:  # frame captured without any errors
-                self.frame_counts0 += 1
-                self.out0.write(frame0)
 
-        if self.showVideo and ok0 and self.curCam == 0:
+            if frameOK and self.recording1:
+                self.frameCountsUSB += 1
+                self.outUSB.write(frame)
+
+        if self.showVideo and frameOK and self.curCam == 0:
             # convert colors from BGR to RGBA
-            cv2image = cv2.cvtColor(frame0, cv2.COLOR_BGR2RGBA)
-            # cv2image = imutils.resize(cv2image, height=740)
-
-            # convert image for tkinter
-            imgtk = ImageTk.PhotoImage(image=Image.fromarray(frame0))
-            self.panel.config(image=imgtk)  # show the image
-            self.panel.imgtk = imgtk  # anchor imgtk so it does not be deleted by garbage-collector
-            
-        # call the same function after {self.loopInterval} milliseconds
-        self.root.after(self.loopInterval, self.video_loop1)
-
-
-    def video_loop2(self):
-
-        """ Get frame from the video stream and show it in Tkinter """
-
-        ok1, frame1 = self.vs1.read()  # read frame from video stream
-
-        # if not self.recordingLock:
-
-        #     if ok1 and self.recording1:
-        #         self.frame_counts1 += 1
-        #         self.out1.write(frame1)
-        if self.showVideo and ok1 and self.curCam == 1:
-            # convert colors from BGR to RGBA
-            cv2image = cv2.cvtColor(frame1, cv2.COLOR_BGR2RGBA)
+            cv2image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGBA)
             # cv2image = imutils.resize(cv2image, height=740)
 
             # convert image for tkinter
@@ -255,47 +244,53 @@ class Application:
             self.panel.imgtk = imgtk  # anchor imgtk so it does not be deleted by garbage-collector
             
         # call the same function after {self.loopInterval} milliseconds
-        self.root.after(self.loopInterval, self.video_loop2)
+        self.root.after(self.loopInterval, self.videoLoopUSB)
 
-    
 
-    def toggleRecord(self,cam):
+    def toggleRecordUSB(self):
         datetimeStamp = datetime.now().strftime("%d-%m-%Y-%H-%M")
         self.recordingLock = True
-        if cam==0:
-            self.recording0 = not self.recording0
-            if (not self.recording0): # Stop recording cam 0
-                audioDuration = self.audio_thread.stop()
-                time.sleep(1)
-                self.end_time0 = time.time()
-                self.out0.release()
-                self.recordAVMergeInfo(self.out0FileName, self.frame_counts0, self.start_time0, self.end_time0, audioDuration)
-                print("Here 2")
-                self.frame_counts0 = 1
-                print("stopped recording front")
-                
-            else: # Start recording cam 0
-                print("Now recording cam 0")
-                self.start_audio_recording("./DASH0-Audio/"+datetimeStamp)
-                self.start_time0 = time.time()
-                self.out0FileName = "./DASH0-Video/"+datetimeStamp+".avi"
-                self.out0 = cv2.VideoWriter(self.out0FileName, self.fourcc, 10, (640, 480))
-                time.sleep(0.5)
+
+        self.recordingUSB = not self.recordingUSB
+        if (not self.recordingUSB): # Stop recording cam 0
+            audioDuration = self.audio_thread.stop()
+            time.sleep(1)
+            self.endTimeUSB = time.time()
+            self.outUSB.release()
+            self.recordAVMergeInfo(self.outFileNameUSB, self.frameCountsUSB, self.startTimeUSB, self.endTimeUSB, audioDuration)
+            self.frameCountsUSB = 1
             
-        elif cam==1: 
-            self.recording1 = not self.recording1
-            if (not self.recording1): # Stop recording cam 1
-                self.out1.release()
-                self.end_time1 = time.time()
-                self.recordAVMergeInfo(self.out1FileName, self.frame_counts1, self.start_time1, self.end_time1, 0)
-                self.frame_counts1 = 1
-            else: # Start recording cam 1
-                print("Now recording cam 1")
-                self.start_time1 = time.time()
-                self.out1FileName = "./DASH1-Video/"+datetimeStamp+".avi"
-                self.out1 = cv2.VideoWriter(self.out1FileName, self.fourcc, 10, (640, 480))
-                time.sleep(0.5)
-        self.recordingLock = False
+        else: # Start recording cam 0
+            self.start_audio_recording("./DASH0-Audio/"+datetimeStamp)
+            self.startTimeUSB = time.time()
+            self.outFileNameUSB = "./DASH0-Video/"+datetimeStamp+".avi"
+            self.outUSB = cv2.VideoWriter(self.outFileNameUSB, self.fourcc, 10, (640, 480))
+            time.sleep(0.5)
+
+        self.recordingLock = False            
+        # elif cam==1: 
+        #     self.recording1 = not self.recording1
+        #     if (not self.recording1): # Stop recording cam 1
+        #         self.out1.release()
+        #         self.end_time1 = time.time()
+        #         self.recordAVMergeInfo(self.out1FileName, self.frame_counts1, self.start_time1, self.end_time1, 0)
+        #         self.frame_counts1 = 1
+        #     else: # Start recording cam 1
+        #         print("Now recording cam 1")
+        #         self.start_time1 = time.time()
+        #         self.out1FileName = "./DASH1-Video/"+datetimeStamp+".avi"
+        #         self.out1 = cv2.VideoWriter(self.out1FileName, self.fourcc, 10, (640, 480))
+        #         time.sleep(0.5)
+
+    def toggleRecordPiCam(self):
+        self.recordingPiCam = not self.recordingPiCam
+
+        if self.recordingPiCam:
+            datetimeStamp = datetime.now().strftime("%d-%m-%Y-%H-%M")
+            self.outFileNamePiCam = "./DASH1-Video/"+datetimeStamp+".avi"
+            self.picam.start_recording()
+        else:
+            self.picam.stop_recording()
 
 
 
@@ -305,25 +300,23 @@ class Application:
         with open('avmergelog.txt', 'a') as log:
             log.write(f"{filename},{fps},{t}, {audioDuration}\n")
 
+
     def destructor(self):
-        print("CLEANING UP GPIOs")
+
         self.readGPIO = False
         
-        if (self.recording0): # Stop recording cam 0
-            self.recording0 = False
+        if (self.recordingUSB): # Stop recording cam 0
+            self.recordingUSB = False
             audioDuration = self.audio_thread.stop()
-            self.end_time0 = time.time()
+            self.endTimeUSB = time.time()
             while self.audio_thread.audio_thread.is_alive():
-                self.end_time0 = time.time()
+                self.endTimeUSB = time.time()
                 time.sleep(0.5)
-            self.out0.release()
+            self.outUSB.release()
 
-            self.recordAVMergeInfo(self.out0FileName, self.frame_counts0, self.start_time0, self.end_time0, audioDuration)
-        if (self.recording1): # Stop recording cam 1
-            self.recording1 = False
-            self.out1.release()
-            self.end_time1 = time.time()
-            self.recordAVMergeInfo(self.out1FileName, self.frame_counts1, self.start_time1, self.end_time1, 0)
+            self.recordAVMergeInfo(self.outFileNameUSB, self.frameCountsUSB, self.startTimeUSB, self.endTimeUSB, audioDuration)
+        if (self.recordingPiCam): # Stop recording cam 1
+            self.picam.stop_recording()
 
         try:
             self.audio_thread.stop()
@@ -331,20 +324,80 @@ class Application:
         except (NameError, AttributeError) as e:
             print("No audio thread started")
         
-
         GPIO.cleanup()
         self.root.destroy()
-        self.vs0.release()  # release web camera 0
-        self.vs1.release()  # release web camera 1
+        self.streamUSB.release()  # release web camera 0
         cv2.destroyAllWindows()  # it is not mandatory in this application
         exit()
 
     def start_audio_recording(self, filename):
         self.audio_thread = AudioRecorder(filename)
-        print("Audio thread: ",self.audio_thread)
-        print("Audio thread type: ", type(self.audio_thread))
         self.audio_thread.start()
         return
+
+
+    def handleToggleSwitches(self):
+        GPIO.setmode(GPIO.BCM)
+        GPIO.setup(RECORD_FRONT_PIN, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+        GPIO.setup(RECORD_REAR_PIN, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+        GPIO.setup(ENABLE_SHOW_PIN, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+        GPIO.setup(TOGGLE_SHOW_PIN, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+        GPIO.setup(OTHER_PIN, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+
+        from messages import cuteMessages
+        cmLength = len(cuteMessages)
+        cmIndex = 0
+
+        while self.readGPIO:
+            if (GPIO.input(RECORD_FRONT_PIN) == GPIO.LOW) == self.recordingUSB:
+                print("RECORD FRONT CHANGED: ",self.recordingUSB)
+                self.toggleRecordUSB()
+                self.recordingLabelUSB.config(text="REC FRONT" if self.recording0 else "")
+
+
+            if (GPIO.input(RECORD_REAR_PIN) == GPIO.LOW) == self.recordingPiCam:
+                print("RECORD REAR CHANGED: ",self.recordingPiCam)
+                self.toggleRecordPiCam()
+                self.recordingLabelPiCam.config(text="REC REAR" if self.recordingPiCam else "")
+
+            if (GPIO.input(ENABLE_SHOW_PIN) == GPIO.LOW) == self.showVideo:
+                print("SHOW VIDEO: ",self.showVideo)
+                self.showVideo = not self.showVideo
+
+                time.sleep(0.5)
+                self.enableShowLabel.config(text="SHOWING" if self.showVideo else "")
+                if cmLength == cmIndex:
+                    im = Image.open('./gabby1.jpg')
+                    im = im.resize((580, 440))
+                    im = im.rotate(240)
+                    img = ImageTk.PhotoImage(im)
+                    self.panel.config(image=img, bg="black")
+                else:   
+                    self.panel.config(image='', bg="black", fg="white", font=('Helvetica', 30), text=makeLineBreaks(cuteMessages[cmIndex],30))
+                if self.showVideo:
+                    cmIndex += 1
+                    if cmIndex > cmLength:
+                        cmIndex = 0
+
+            if (GPIO.input(TOGGLE_SHOW_PIN) == GPIO.HIGH) == (self.curCam == 1):
+                print("RECORD FRONT CHANGED: ",self.curCam)
+                self.curCam = 0 if self.curCam == 1 else 1
+                self.handlePiCamera(self)
+
+                self.toggleShowLabel.config(text="REAR" if self.curCam == 1 else "FRONT")
+
+    def handlePiCamera(self):
+        if self.curCam == 0 and self.showVideo:
+            self.picamThread = threading.Thread(target=self.startPiCameraPreview, args=())
+            self.picamThread.start()
+        elif self.curCam == 1:
+            try:
+                self.picam.stop_preview()
+            except:
+                print("Can't stop preview")
+
+    def startPiCameraPreview(self):
+        self.picam.start_preview(fullscreen=False, window=(-20, 30, 1330, 690))
     
 
 def find_camera_indices():
@@ -356,74 +409,6 @@ def find_camera_indices():
         else:
             valid_cams.append(i)
     return valid_cams
-
-
-
-
-def handleToggleSwitches(pba):
-    GPIO.setmode(GPIO.BCM)
-    GPIO.setup(RECORD_FRONT_PIN, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
-    GPIO.setup(RECORD_REAR_PIN, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
-    GPIO.setup(ENABLE_SHOW_PIN, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
-    GPIO.setup(TOGGLE_SHOW_PIN, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
-    GPIO.setup(OTHER_PIN, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
-
-
-    from messages import cuteMessages
-    cmLength = len(cuteMessages)
-    cmIndex = 0
-
-    while pba.readGPIO:
-        if (GPIO.input(RECORD_FRONT_PIN) == GPIO.LOW) == pba.recording0:
-            print("RECORD FRONT CHANGED: ",pba.recording0)
-            pba.toggleRecord(0)
-            pba.recording0Label.config(text="REC FRONT" if pba.recording0 else "")
-
-
-        if (GPIO.input(RECORD_REAR_PIN) == GPIO.LOW) == pba.recording1:
-            print("RECORD REAR CHANGED: ",pba.recording1)
-            pba.toggleRecord(1)
-            pba.recording1Label.config(text="REC REAR" if pba.recording1 else "")
-
-
-        if (GPIO.input(ENABLE_SHOW_PIN) == GPIO.LOW) == pba.showVideo:
-            print("SHOW VIDEO: ",pba.showVideo)
-            pba.showVideo = not pba.showVideo
-
-            time.sleep(0.5)
-            pba.enableShowLabel.config(text="SHOWING" if pba.showVideo else "")
-            if cmLength == cmIndex:
-                im = Image.open('./gabby1.jpg')
-                im = im.resize((580, 440))
-                im = im.rotate(240)
-                img = ImageTk.PhotoImage(im)
-                pba.panel.config(image=img, bg="black")
-            else:   
-                pba.panel.config(image='', bg="black", fg="white", font=('Helvetica', 30), text=makeLineBreaks(cuteMessages[cmIndex],30))
-            if pba.showVideo:
-                cmIndex += 1
-                if cmIndex > cmLength:
-                    cmIndex = 0
-
-        if (GPIO.input(TOGGLE_SHOW_PIN) == GPIO.HIGH) == (pba.curCam == 1):
-            print("RECORD FRONT CHANGED: ",pba.curCam)
-            pba.curCam = 0 if pba.curCam == 1 else 1
-            handlePiCamera(pba)
-
-            pba.toggleShowLabel.config(text="REAR" if pba.curCam == 1 else "FRONT")
-
-def handlePiCamera(pba):
-    if pba.curCam == 0 and pba.showVideo:
-        pba.picamThread = threading.Thread(target=startPiCameraPreview, args=(pba,))
-        pba.picamThread.start()
-    elif pba.curCam == 1:
-        try:
-            pba.picam.stop_preview()
-        except:
-            print("Can't stop preview")
-
-def startPiCameraPreview(pba):
-    pba.picam.start_preview(fullscreen=False, window=(-20, 30, 1330, 690))
     
 
 def makeLineBreaks(stringToBreak, breakIndex):
@@ -443,7 +428,7 @@ def makeLineBreaks(stringToBreak, breakIndex):
 
 if __name__ == "__main__":
     pba = Application()
-    gpioThread = threading.Thread(target=handleToggleSwitches, args=(pba,))
+    gpioThread = threading.Thread(target=pba.handleToggleSwitches, args=())
     gpioThread.start()
     pba.root.mainloop()
     exit()
