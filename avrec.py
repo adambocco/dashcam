@@ -382,7 +382,7 @@ class Application:
             if (GPIO.input(TOGGLE_SHOW_PIN) == GPIO.HIGH) == (self.curCam == 1):
                 print("RECORD FRONT CHANGED: ",self.curCam)
                 self.curCam = 0 if self.curCam == 1 else 1
-                self.handlePiCamera(self)
+                self.handlePiCamera()
 
                 self.toggleShowLabel.config(text="REAR" if self.curCam == 1 else "FRONT")
 
