@@ -374,7 +374,7 @@ def handleToggleSwitches(pba):
     cmLength = len(cuteMessages)
     cmIndex = 0
 
-    while pba.readGPIO:
+    if pba.readGPIO:
         time.sleep(1)
         if (GPIO.input(RECORD_FRONT_PIN) == GPIO.LOW) == pba.recording0:
             print("RECORD FRONT CHANGED: ",pba.recording0)
@@ -445,6 +445,7 @@ def makeLineBreaks(stringToBreak, breakIndex):
 
 if __name__ == "__main__":
     pba = Application()
+    handleToggleSwitches(pba)
     # gpioThread = threading.Thread(target=handleToggleSwitches, args=(pba,))
     # gpioThread.start()
     pba.root.mainloop()
