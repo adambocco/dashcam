@@ -408,19 +408,19 @@ def handleToggleSwitches(pba):
         if (GPIO.input(TOGGLE_SHOW_PIN) == GPIO.HIGH) == (pba.curCam == 1):
             print("RECORD FRONT CHANGED: ",pba.curCam)
             pba.curCam = 0 if pba.curCam == 1 else 1
-
-
-            if pba.curCam == 0 and pba.showVideo:
-                pba.picamThread = threading.Thread(target=pba.picam.start_preview, args=())
-                pba.picamThread.start()
-            elif pba.curCam == 1:
-                try:
-                    pba.picam.stop_preview()
-                except:
-                    print("Can't stop preview")
+            handlePiCamera(pba)
 
             pba.toggleShowLabel.config(text="REAR" if pba.curCam == 1 else "FRONT")
 
+def handlePiCamera(pba):
+    if pba.curCam == 0 and pba.showVideo:
+        pba.picamThread = threading.Thread(target=pba.picam.start_preview, args=(fullscreen=False, window=(20, 20, 640, 480)))
+        pba.picamThread.start()
+    elif pba.curCam == 1:
+        try:
+            pba.picam.stop_preview()
+        except:
+            print("Can't stop preview")
 
 def makeLineBreaks(stringToBreak, breakIndex):
     strBuilder = ""
