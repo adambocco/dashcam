@@ -239,15 +239,15 @@ class Application:
 
         ok1, frame1 = self.vs1.read()  # read frame from video stream
 
-        if not self.recordingLock:
+        # if not self.recordingLock:
 
-            if ok1 and self.recording1:
-                self.frame_counts1 += 1
-                self.out1.write(frame1)
+        #     if ok1 and self.recording1:
+        #         self.frame_counts1 += 1
+        #         self.out1.write(frame1)
         if self.showVideo and ok1 and self.curCam == 1:
             # convert colors from BGR to RGBA
             cv2image = cv2.cvtColor(frame1, cv2.COLOR_BGR2RGBA)
-            cv2image = imutils.resize(cv2image, height=740)
+            # cv2image = imutils.resize(cv2image, height=740)
 
             # convert image for tkinter
             imgtk = ImageTk.PhotoImage(image=Image.fromarray(cv2image))
@@ -255,7 +255,6 @@ class Application:
             self.panel.imgtk = imgtk  # anchor imgtk so it does not be deleted by garbage-collector
             
         # call the same function after {self.loopInterval} milliseconds
-        handleToggleSwitches(self)
         self.root.after(self.loopInterval, self.video_loop2)
 
     
@@ -374,8 +373,7 @@ def handleToggleSwitches(pba):
     cmLength = len(cuteMessages)
     cmIndex = 0
 
-    if pba.readGPIO:
-        time.sleep(1)
+    while pba.readGPIO:
         if (GPIO.input(RECORD_FRONT_PIN) == GPIO.LOW) == pba.recording0:
             print("RECORD FRONT CHANGED: ",pba.recording0)
             pba.toggleRecord(0)
@@ -445,8 +443,7 @@ def makeLineBreaks(stringToBreak, breakIndex):
 
 if __name__ == "__main__":
     pba = Application()
-    handleToggleSwitches(pba)
-    # gpioThread = threading.Thread(target=handleToggleSwitches, args=(pba,))
-    # gpioThread.start()
+    gpioThread = threading.Thread(target=handleToggleSwitches, args=(pba,))
+    gpioThread.start()
     pba.root.mainloop()
     exit()
