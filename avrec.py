@@ -13,7 +13,7 @@ import datetime
 import re
 import urllib
 import RPi.GPIO as GPIO
-import picamera
+from picamera import PiCamera
 import imutils
 from datetime import datetime
 import RPi.GPIO as GPIO
@@ -119,6 +119,9 @@ class Application:
         camindices = find_camera_indices()
         self.cam0Index = camindices[1]
         self.cam1Index = camindices[0]
+
+        self.picam = PiCamera()
+
         self.showVideo = True # Stop rendering in tkinter to improve recording performance
         self.recording0 = False
         self.recording1 = False
@@ -192,6 +195,7 @@ class Application:
 
         self.thr2 = threading.Thread(target=self.video_loop2, args=())
         self.thr2.start()
+
 
         # self.root.after(self.loopInterval, self.video_loop)
         
@@ -385,6 +389,16 @@ def handleToggleSwitches(pba):
         if (GPIO.input(ENABLE_SHOW_PIN) == GPIO.LOW) == pba.showVideo:
             print("SHOW VIDEO: ",pba.showVideo)
             pba.showVideo = not pba.showVideo
+            
+            if pba.curCam == 1 and pba.showVideo:
+                pba.picamThread = threading.thread(target=self.picam.start_preview, args=())
+                pba.picamThread.start()
+            elif pba.curCam == 1:
+                try:
+                    pba.picam.stop_preview()
+                except:
+                    print("Can't stop preview")
+
             time.sleep(0.5)
             pba.enableShowLabel.config(text="SHOWING" if pba.showVideo else "")
             if cmLength == cmIndex:
