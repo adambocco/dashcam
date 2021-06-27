@@ -232,6 +232,9 @@ class Application:
                 self.frameCountsUSB += 1
                 self.outUSB.write(frame)
 
+        print("CURCAM: ",self.curCam)
+        print("Show Video: ",self.showVideo)
+        print("FrameOK: ", frameOK)
         if self.showVideo and frameOK and self.curCam == 1:
             # convert colors from BGR to RGBA
             cv2image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGBA)
@@ -383,7 +386,7 @@ class Application:
                     except:
                         pass
 
-            if (GPIO.input(TOGGLE_SHOW_PIN) == GPIO.HIGH) == (self.curCam == 0):
+            if (GPIO.input(TOGGLE_SHOW_PIN) == GPIO.HIGH) == (self.curCam == 1):
                 print("RECORD FRONT CHANGED: ",self.curCam)
                 self.curCam = 0 if self.curCam == 1 else 1
                 self.handlePiCamera()
