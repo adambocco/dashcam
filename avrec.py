@@ -374,6 +374,7 @@ def handleToggleSwitches(pba):
     cmIndex = 0
 
     while pba.readGPIO:
+        time.sleep(1)
         if (GPIO.input(RECORD_FRONT_PIN) == GPIO.LOW) == pba.recording0:
             print("RECORD FRONT CHANGED: ",pba.recording0)
             pba.toggleRecord(0)
