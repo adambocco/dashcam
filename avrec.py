@@ -389,15 +389,6 @@ def handleToggleSwitches(pba):
         if (GPIO.input(ENABLE_SHOW_PIN) == GPIO.LOW) == pba.showVideo:
             print("SHOW VIDEO: ",pba.showVideo)
             pba.showVideo = not pba.showVideo
-            
-            if pba.curCam == 1 and pba.showVideo:
-                pba.picamThread = threading.thread(target=self.picam.start_preview, args=())
-                pba.picamThread.start()
-            elif pba.curCam == 1:
-                try:
-                    pba.picam.stop_preview()
-                except:
-                    print("Can't stop preview")
 
             time.sleep(0.5)
             pba.enableShowLabel.config(text="SHOWING" if pba.showVideo else "")
@@ -417,6 +408,17 @@ def handleToggleSwitches(pba):
         if (GPIO.input(TOGGLE_SHOW_PIN) == GPIO.HIGH) == (pba.curCam == 1):
             print("RECORD FRONT CHANGED: ",pba.curCam)
             pba.curCam = 0 if pba.curCam == 1 else 1
+
+
+            if pba.curCam == 1 and pba.showVideo:
+                pba.picamThread = threading.thread(target=self.picam.start_preview, args=())
+                pba.picamThread.start()
+            elif pba.curCam == 1:
+                try:
+                    pba.picam.stop_preview()
+                except:
+                    print("Can't stop preview")
+                    
             pba.toggleShowLabel.config(text="REAR" if pba.curCam == 1 else "FRONT")
 
 
