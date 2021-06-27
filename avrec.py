@@ -414,13 +414,17 @@ def handleToggleSwitches(pba):
 
 def handlePiCamera(pba):
     if pba.curCam == 0 and pba.showVideo:
-        pba.picamThread = threading.Thread(target=pba.picam.start_preview, args=(fullscreen=False, window=(20, 20, 640, 480)))
+        pba.picamThread = threading.Thread(target=startPiCameraPreview, args=(pba))
         pba.picamThread.start()
     elif pba.curCam == 1:
         try:
             pba.picam.stop_preview()
         except:
             print("Can't stop preview")
+
+def startPiCameraPreview(pba):
+    pba.picam.start_preview(fullscreen=False, window=(20, 20, 640, 480))
+    
 
 def makeLineBreaks(stringToBreak, breakIndex):
     strBuilder = ""
