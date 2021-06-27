@@ -115,7 +115,7 @@ class Application:
     def __init__(self, output_path="./"):
         # Variables set to none are initialized in toggleRecord()
         camindices = find_camera_indices()
-        self.camIndexUSB = camindices[1]
+        self.camIndexUSB = camindices[0]
 
         self.picam = PiCamera()
         self.showVideo = True # Stop rendering in tkinter to improve recording performance
@@ -232,9 +232,9 @@ class Application:
                 self.frameCountsUSB += 1
                 self.outUSB.write(frame)
 
-        print("CURCAM: ",self.curCam)
-        print("Show Video: ",self.showVideo)
-        print("FrameOK: ", frameOK)
+        # print("CURCAM: ",self.curCam)
+        # print("Show Video: ",self.showVideo)
+        # print("FrameOK: ", frameOK)
         if self.showVideo and frameOK and self.curCam == 1:
             # convert colors from BGR to RGBA
             cv2image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGBA)
