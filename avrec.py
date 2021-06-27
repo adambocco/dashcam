@@ -190,8 +190,8 @@ class Application:
 
         self.recordingLock = False
 
-        self.thr = threading.Thread(target=self.video_loop1, args=())
-        self.thr.start()
+        # self.thr = threading.Thread(target=self.video_loop1, args=())
+        # self.thr.start()
 
         self.thr2 = threading.Thread(target=self.video_loop2, args=())
         self.thr2.start()
