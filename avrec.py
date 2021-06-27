@@ -222,7 +222,7 @@ class Application:
         if self.showVideo and ok0 and self.curCam == 0:
             # convert colors from BGR to RGBA
             cv2image = cv2.cvtColor(frame0, cv2.COLOR_BGR2RGBA)
-            cv2image = imutils.resize(cv2image, height=740)
+            # cv2image = imutils.resize(cv2image, height=740)
 
             # convert image for tkinter
             imgtk = ImageTk.PhotoImage(image=Image.fromarray(frame0))
