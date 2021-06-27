@@ -351,7 +351,7 @@ class Application:
             if (GPIO.input(RECORD_FRONT_PIN) == GPIO.LOW) == self.recordingUSB:
                 print("RECORD FRONT CHANGED: ",self.recordingUSB)
                 self.toggleRecordUSB()
-                self.recordingLabelUSB.config(text="REC FRONT" if self.recording0 else "")
+                self.recordingLabelUSB.config(text="REC FRONT" if self.recordingUSB else "")
 
 
             if (GPIO.input(RECORD_REAR_PIN) == GPIO.LOW) == self.recordingPiCam:
