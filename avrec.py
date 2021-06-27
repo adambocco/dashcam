@@ -423,7 +423,7 @@ def handlePiCamera(pba):
             print("Can't stop preview")
 
 def startPiCameraPreview(pba):
-    pba.picam.start_preview(fullscreen=False, window=(0, 30, 700, 540))
+    pba.picam.start_preview(fullscreen=False, window=(0, 50, 700, 540))
     
 
 def makeLineBreaks(stringToBreak, breakIndex):
