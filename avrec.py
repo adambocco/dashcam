@@ -230,32 +230,32 @@ class Application:
             self.panel.imgtk = imgtk  # anchor imgtk so it does not be deleted by garbage-collector
             
         # call the same function after {self.loopInterval} milliseconds
-        self.root.after(self.loopInterval, self.video_loop2)
+        self.root.after(self.loopInterval, self.video_loop1)
 
 
     def video_loop2(self):
-        while True:
-            """ Get frame from the video stream and show it in Tkinter """
 
-            ok1, frame1 = self.vs1.read()  # read frame from video stream
+        """ Get frame from the video stream and show it in Tkinter """
 
-            if not self.recordingLock:
+        ok1, frame1 = self.vs1.read()  # read frame from video stream
 
-                if ok1 and self.recording1:
-                    self.frame_counts1 += 1
-                    self.out1.write(frame1)
-            if self.showVideo and ok1 and self.curCam == 1:
-                # convert colors from BGR to RGBA
-                # cv2image = cv2.cvtColor(shownFrame, cv2.COLOR_BGR2RGBA)
-                # cv2image = imutils.resize(cv2image, height=740)
+        if not self.recordingLock:
 
-                # convert image for tkinter
-                imgtk = ImageTk.PhotoImage(image=Image.fromarray(frame1))
-                self.panel.config(image=imgtk)  # show the image
-                self.panel.imgtk = imgtk  # anchor imgtk so it does not be deleted by garbage-collector
+            if ok1 and self.recording1:
+                self.frame_counts1 += 1
+                self.out1.write(frame1)
+        if self.showVideo and ok1 and self.curCam == 1:
+            # convert colors from BGR to RGBA
+            # cv2image = cv2.cvtColor(shownFrame, cv2.COLOR_BGR2RGBA)
+            # cv2image = imutils.resize(cv2image, height=740)
+
+            # convert image for tkinter
+            imgtk = ImageTk.PhotoImage(image=Image.fromarray(frame1))
+            self.panel.config(image=imgtk)  # show the image
+            self.panel.imgtk = imgtk  # anchor imgtk so it does not be deleted by garbage-collector
             
         # call the same function after {self.loopInterval} milliseconds
-        # self.root.after(self.loopInterval, self.video_loop)
+        self.root.after(self.loopInterval, self.video_loop2)
 
     
 
