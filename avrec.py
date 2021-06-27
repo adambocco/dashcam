@@ -232,7 +232,7 @@ class Application:
                 self.frameCountsUSB += 1
                 self.outUSB.write(frame)
 
-        if self.showVideo and frameOK and self.curCam == 0:
+        if self.showVideo and frameOK and self.curCam == 1:
             # convert colors from BGR to RGBA
             cv2image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGBA)
             # cv2image = imutils.resize(cv2image, height=740)
