@@ -414,7 +414,7 @@ def handleToggleSwitches(pba):
 
 def handlePiCamera(pba):
     if pba.curCam == 0 and pba.showVideo:
-        pba.picamThread = threading.Thread(target=startPiCameraPreview, args=(pba))
+        pba.picamThread = threading.Thread(target=startPiCameraPreview, args=(pba,))
         pba.picamThread.start()
     elif pba.curCam == 1:
         try:
