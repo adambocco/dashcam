@@ -131,7 +131,7 @@ class Application:
         self.start_time1 = None
         self.end_time0 = None
         self.end_time1 = None
-        self.loopInterval = 10
+        self.loopInterval = 15
         self.defaultScreenText = "Baked\nBeans" # Text on screen when not streaming
         self.curCam = 1 # Currently streaming
         # capture video frames, 0 is your default video camera
