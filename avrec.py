@@ -131,7 +131,7 @@ class Application:
         self.start_time1 = None
         self.end_time0 = None
         self.end_time1 = None
-        self.loopInterval = 15
+        self.loopInterval = 12
         self.defaultScreenText = "Baked\nBeans" # Text on screen when not streaming
         self.curCam = 1 # Currently streaming
         # capture video frames, 0 is your default video camera
@@ -221,8 +221,8 @@ class Application:
 
         if self.showVideo and ok0 and self.curCam == 0:
             # convert colors from BGR to RGBA
-            # cv2image = cv2.cvtColor(shownFrame, cv2.COLOR_BGR2RGBA)
-            # cv2image = imutils.resize(cv2image, height=740)
+            cv2image = cv2.cvtColor(frame0, cv2.COLOR_BGR2RGBA)
+            cv2image = imutils.resize(cv2image, height=740)
 
             # convert image for tkinter
             imgtk = ImageTk.PhotoImage(image=Image.fromarray(frame0))
@@ -246,11 +246,11 @@ class Application:
                 self.out1.write(frame1)
         if self.showVideo and ok1 and self.curCam == 1:
             # convert colors from BGR to RGBA
-            # cv2image = cv2.cvtColor(shownFrame, cv2.COLOR_BGR2RGBA)
-            # cv2image = imutils.resize(cv2image, height=740)
+            cv2image = cv2.cvtColor(frame1, cv2.COLOR_BGR2RGBA)
+            cv2image = imutils.resize(cv2image, height=740)
 
             # convert image for tkinter
-            imgtk = ImageTk.PhotoImage(image=Image.fromarray(frame1))
+            imgtk = ImageTk.PhotoImage(image=Image.fromarray(cv2image))
             self.panel.config(image=imgtk)  # show the image
             self.panel.imgtk = imgtk  # anchor imgtk so it does not be deleted by garbage-collector
             
