@@ -228,7 +228,7 @@ class Application:
 
         if not self.recordingLock:
 
-            if frameOK and self.recording1:
+            if frameOK and self.recordingUSB:
                 self.frameCountsUSB += 1
                 self.outUSB.write(frame)
 
