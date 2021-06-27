@@ -413,7 +413,7 @@ def handleToggleSwitches(pba):
             if pba.curCam == 0 and pba.showVideo:
                 pba.picamThread = threading.Thread(target=pba.picam.start_preview, args=())
                 pba.picamThread.start()
-            elif pba.curCam == 0:
+            elif pba.curCam == 1:
                 try:
                     pba.picam.stop_preview()
                 except:
