@@ -115,8 +115,7 @@ class Application:
     def __init__(self, output_path="./"):
         # Variables set to none are initialized in toggleRecord()
         camindices = find_camera_indices()
-        self.camIndexUSB = camindices[0]
-
+        self.camIndexUSB = camindices[1]
 
         self.picam = PiCamera()
         self.showVideo = True # Stop rendering in tkinter to improve recording performance
