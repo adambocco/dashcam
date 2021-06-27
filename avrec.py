@@ -155,14 +155,14 @@ class Application:
         self.root.bind("<F11>", self.toggleFullScreen)
         self.root.bind("<Escape>", self.quitFullScreen)
         # These are compatible with 3.5inch 480, 320 display
-        w = 1024  # width for the Tk root
+        w = 1280  # width for the Tk root
         h = 720  # height for the Tk root
         self.root.resizable(0, 0)
         ws = self.root .winfo_screenwidth()  # width of the screen
         hs = self.root .winfo_screenheight()  # height of the screen
         x = (ws/2) - (w/2)
         y = (hs/2) - (h/2)
-        self.root .geometry('%dx%d+%d+%d' % (w, h, x, y))
+        self.root.geometry('1280x720')
         # set window title
         self.root.title("DASHCAM")
         self.root.protocol('WM_DELETE_WINDOW', self.destructor)
@@ -423,7 +423,7 @@ def handlePiCamera(pba):
             print("Can't stop preview")
 
 def startPiCameraPreview(pba):
-    pba.picam.start_preview(fullscreen=False, window=(0, 50, 700, 540))
+    pba.picam.start_preview(fullscreen=False, window=(0, 50, 1250, 670))
     
 
 def makeLineBreaks(stringToBreak, breakIndex):
