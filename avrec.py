@@ -1,5 +1,5 @@
 import cv2
-from pyaudio import paInt16, PyAudio
+from pyaudio import PyAudio
 import wave
 import threading
 import time
@@ -60,7 +60,7 @@ class AudioRecorder():
         self.startTime = 0
         self.endTime = 0
         self.duration = 0
-        self.format = paInt16
+        self.format = 8
         self.audio_filename = filename+".wav"
         self.audio = PyAudio()
         self.stream = self.audio.open(format=self.format,
