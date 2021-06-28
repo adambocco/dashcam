@@ -289,7 +289,7 @@ class Application:
 
         if self.recordingPiCam:
             datetimeStamp = datetime.now().strftime("%d-%m-%Y-%H-%M")
-            self.outFileNamePiCam = "./DASH1-Video/"+datetimeStamp+".h264"
+            self.outFileNamePiCam = "home/pi/Desktop/dashcam/DASH1-Video/"+datetimeStamp+".h264"
             self.picam.start_recording(self.outFileNamePiCam)
         else:
             self.picam.stop_recording()
