@@ -340,8 +340,8 @@ class Application:
                 else:
                     if cmLength == cmIndex:
                         im = Image.open('./gabby1.jpg')
-                        im = im.resize((640, 480))
-                        im = im.rotate(250)
+                        im = im.resize((1280, 720))
+                        im = im.rotate(280)
                         img = ImageTk.PhotoImage(im)
                         self.panel.config(image=img, bg="black")
                     else:   
