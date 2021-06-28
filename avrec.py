@@ -380,14 +380,12 @@ class Application:
                 else:   
                     self.panel.config(image='', bg="black", fg="white", font=('Helvetica', 30), text=makeLineBreaks(cuteMessages[cmIndex],30))
                 if self.showVideo:
+                    
+
                     cmIndex += 1
                     if cmIndex > cmLength:
                         cmIndex = 0
-                else:
-                    try:
-                        self.picam.stop_preview()
-                    except:
-                        pass
+                self.handlePiCamera()
 
             if (GPIO.input(TOGGLE_SHOW_PIN) == GPIO.HIGH) == (self.curCam == 1):
                 print("RECORD FRONT CHANGED: ",self.curCam)
