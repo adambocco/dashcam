@@ -330,7 +330,6 @@ class Application:
                 print("SHOW VIDEO: ",self.showVideo)
                 self.showVideo = not self.showVideo
 
-                time.sleep(0.5)
                 self.enableShowLabel.config(text="SHOWING" if self.showVideo else "")
 
                 if self.showVideo:
@@ -343,10 +342,11 @@ class Application:
                     else:   
                         self.panel.config(image='', bg="black", fg="white", font=('Helvetica', 30), text=makeLineBreaks(cuteMessages[cmIndex],30))
 
-                        cmIndex += 1
+                    cmIndex += 1
                     if cmIndex > cmLength:
                         cmIndex = 0
-                self.handlePiCamera()
+                else:
+                    self.picam.stop_preview()
 
             if (GPIO.input(TOGGLE_SHOW_PIN) == GPIO.HIGH) == (self.curCam == 1):
                 print("RECORD FRONT CHANGED: ",self.curCam)
