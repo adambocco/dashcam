@@ -184,10 +184,10 @@ class Application:
         # self.thr = threading.Thread(target=self.video_loop1, args=())
         # self.thr.start()
 
-        # self.thr2 = threading.Thread(target=self.video_loop2, args=())
-        # self.thr2.start()
+        self.threadUSB = threading.Thread(target=self.videoLoopUSB, args=())
+        self.threadUSB.start()
 
-        self.root.after(self.loopInterval, self.videoLoopUSB)
+        # self.root.after(self.loopInterval, self.videoLoopUSB)
         
     def toggleFullScreen(self, event):
         self.fullScreenState = not self.fullScreenState
@@ -197,56 +197,31 @@ class Application:
         self.fullScreenState = False
         self.root.attributes("-fullscreen", self.fullScreenState)
 
-    # def video_loop1(self):
-
-    #     """ Get frame from the video stream and show it in Tkinter """
-
-    #     ok0, frame0 = self.vs0.read()  # read frame from video stream
-
-    #     if not self.recordingLock:
-    #         if ok0 and self.recording0:  # frame captured without any errors
-    #             self.frameCountsUSB += 1
-    #             self.out.write(frame0)
-
-    #     if self.showVideo and ok0 and self.curCam == 0:
-    #         # convert colors from BGR to RGBA
-    #         cv2image = cv2.cvtColor(frame0, cv2.COLOR_BGR2RGBA)
-    #         # cv2image = imutils.resize(cv2image, height=740)
-
-    #         # convert image for tkinter
-    #         imgtk = ImageTk.PhotoImage(image=Image.fromarray(frame0))
-    #         self.panel.config(image=imgtk)  # show the image
-    #         self.panel.imgtk = imgtk  # anchor imgtk so it does not be deleted by garbage-collector
-            
-    #     # call the same function after {self.loopInterval} milliseconds
-    #     self.root.after(self.loopInterval, self.video_loop1)
-
-
     def videoLoopUSB(self):
+        while True:
+            frameOK, frame = self.streamUSB.read()  # read frame from video stream
 
-        frameOK, frame = self.streamUSB.read()  # read frame from video stream
+            if not self.recordingLock:
 
-        if not self.recordingLock:
+                if frameOK and self.recordingUSB:
+                    self.frameCountsUSB += 1
+                    self.outUSB.write(frame)
 
-            if frameOK and self.recordingUSB:
-                self.frameCountsUSB += 1
-                self.outUSB.write(frame)
+            # print("CURCAM: ",self.curCam)
+            # print("Show Video: ",self.showVideo)
+            # print("FrameOK: ", frameOK)
+            if self.showVideo and frameOK and self.curCam == 1:
+                # convert colors from BGR to RGBA
+                cv2image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGBA)
+                cv2image = imutils.resize(cv2image, height=740)
 
-        # print("CURCAM: ",self.curCam)
-        # print("Show Video: ",self.showVideo)
-        # print("FrameOK: ", frameOK)
-        if self.showVideo and frameOK and self.curCam == 1:
-            # convert colors from BGR to RGBA
-            cv2image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGBA)
-            # cv2image = imutils.resize(cv2image, height=740)
-
-            # convert image for tkinter
-            imgtk = ImageTk.PhotoImage(image=Image.fromarray(cv2image))
-            self.panel.config(image=imgtk)  # show the image
-            self.panel.imgtk = imgtk  # anchor imgtk so it does not be deleted by garbage-collector
-            
-        # call the same function after {self.loopInterval} milliseconds
-        self.root.after(self.loopInterval, self.videoLoopUSB)
+                # convert image for tkinter
+                imgtk = ImageTk.PhotoImage(image=Image.fromarray(cv2image))
+                self.panel.config(image=imgtk)  # show the image
+                self.panel.imgtk = imgtk  # anchor imgtk so it does not be deleted by garbage-collector
+                
+            # call the same function after {self.loopInterval} milliseconds
+            # self.root.after(self.loopInterval, self.videoLoopUSB)
 
 
     def toggleRecordUSB(self):
@@ -371,18 +346,18 @@ class Application:
 
                 time.sleep(0.5)
                 self.enableShowLabel.config(text="SHOWING" if self.showVideo else "")
-                if cmLength == cmIndex:
-                    im = Image.open('./gabby1.jpg')
-                    im = im.resize((580, 440))
-                    im = im.rotate(240)
-                    img = ImageTk.PhotoImage(im)
-                    self.panel.config(image=img, bg="black")
-                else:   
-                    self.panel.config(image='', bg="black", fg="white", font=('Helvetica', 30), text=makeLineBreaks(cuteMessages[cmIndex],30))
-                if self.showVideo:
-                    
 
-                    cmIndex += 1
+                if self.showVideo:
+                    if cmLength == cmIndex:
+                        im = Image.open('./gabby1.jpg')
+                        im = im.resize((640, 480))
+                        im = im.rotate(250)
+                        img = ImageTk.PhotoImage(im)
+                        self.panel.config(image=img, bg="black")
+                    else:   
+                        self.panel.config(image='', bg="black", fg="white", font=('Helvetica', 30), text=makeLineBreaks(cuteMessages[cmIndex],30))
+
+                        cmIndex += 1
                     if cmIndex > cmLength:
                         cmIndex = 0
                 self.handlePiCamera()
