@@ -333,6 +333,7 @@ class Application:
                 self.enableShowLabel.config(text="SHOWING" if self.showVideo else "")
 
                 if self.showVideo:
+                    self.handlePiCamera()
                     cmIndex += 1
                     if cmIndex > cmLength:
                         cmIndex = 0
