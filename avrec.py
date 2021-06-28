@@ -304,33 +304,36 @@ class Application:
 
 
     def destructor(self):
-
-        self.readGPIO = False
-        
-        if (self.recordingUSB): # Stop recording cam 0
-            self.recordingUSB = False
-            audioDuration = self.audio_thread.stop()
-            self.endTimeUSB = time.time()
-            while self.audio_thread.audio_thread.is_alive():
-                self.endTimeUSB = time.time()
-                time.sleep(0.5)
-            self.outUSB.release()
-
-            self.recordAVMergeInfo(self.outFileNameUSB, self.frameCountsUSB, self.startTimeUSB, self.endTimeUSB, audioDuration)
-        if (self.recordingPiCam): # Stop recording cam 1
-            self.picam.stop_recording()
-
         try:
-            self.audio_thread.stop()
+            self.readGPIO = False
+            
+            if (self.recordingUSB): # Stop recording cam 0
+                self.recordingUSB = False
+                audioDuration = self.audio_thread.stop()
+                self.endTimeUSB = time.time()
+                while self.audio_thread.audio_thread.is_alive():
+                    self.endTimeUSB = time.time()
+                    time.sleep(0.5)
+                self.outUSB.release()
 
-        except (NameError, AttributeError) as e:
-            print("No audio thread started")
-        
-        GPIO.cleanup()
-        self.root.destroy()
-        self.streamUSB.release()  # release web camera 0
-        cv2.destroyAllWindows()  # it is not mandatory in this application
-        exit()
+                self.recordAVMergeInfo(self.outFileNameUSB, self.frameCountsUSB, self.startTimeUSB, self.endTimeUSB, audioDuration)
+            if (self.recordingPiCam): # Stop recording cam 1
+                self.picam.stop_recording()
+
+            try:
+                self.audio_thread.stop()
+
+            except (NameError, AttributeError) as e:
+                print("No audio thread started")
+            
+            GPIO.cleanup()
+            self.root.destroy()
+            self.streamUSB.release()  # release web camera 0
+            self.picam.close()
+            cv2.destroyAllWindows()  # it is not mandatory in this application
+            exit()
+        except:
+            exit()
 
     def start_audio_recording(self, filename):
         self.audio_thread = AudioRecorder(filename)
