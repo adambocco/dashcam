@@ -181,13 +181,10 @@ class Application:
         self.toggleShowLabel = tk.Label(self.root, bg="black", fg="white", font=LABEL_FONT, text="REAR" if GPIO.input(TOGGLE_SHOW_PIN)==GPIO.HIGH else "FRONT")
         self.toggleShowLabel.grid(row=0, column=4)
 
-        # self.thr = threading.Thread(target=self.video_loop1, args=())
-        # self.thr.start()
+        # self.threadUSB = threading.Thread(target=self.videoLoopUSB, args=())
+        # self.threadUSB.start()
 
-        self.threadUSB = threading.Thread(target=self.videoLoopUSB, args=())
-        self.threadUSB.start()
-
-        # self.root.after(self.loopInterval, self.videoLoopUSB)
+        self.root.after(self.loopInterval, self.videoLoopUSB)
         
     def toggleFullScreen(self, event):
         self.fullScreenState = not self.fullScreenState
@@ -197,31 +194,32 @@ class Application:
         self.fullScreenState = False
         self.root.attributes("-fullscreen", self.fullScreenState)
 
+
     def videoLoopUSB(self):
-        while True:
-            frameOK, frame = self.streamUSB.read()  # read frame from video stream
 
-            if not self.recordingLock:
+        frameOK, frame = self.streamUSB.read()  # read frame from video stream
 
-                if frameOK and self.recordingUSB:
-                    self.frameCountsUSB += 1
-                    self.outUSB.write(frame)
+        if not self.recordingLock:
 
-            # print("CURCAM: ",self.curCam)
-            # print("Show Video: ",self.showVideo)
-            # print("FrameOK: ", frameOK)
-            if self.showVideo and frameOK and self.curCam == 1:
-                # convert colors from BGR to RGBA
-                cv2image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGBA)
-                cv2image = imutils.resize(cv2image, height=740)
+            if frameOK and self.recordingUSB:
+                self.frameCountsUSB += 1
+                self.outUSB.write(frame)
 
-                # convert image for tkinter
-                imgtk = ImageTk.PhotoImage(image=Image.fromarray(cv2image))
-                self.panel.config(image=imgtk)  # show the image
-                self.panel.imgtk = imgtk  # anchor imgtk so it does not be deleted by garbage-collector
-                
-            # call the same function after {self.loopInterval} milliseconds
-            # self.root.after(self.loopInterval, self.videoLoopUSB)
+        # print("CURCAM: ",self.curCam)
+        # print("Show Video: ",self.showVideo)
+        # print("FrameOK: ", frameOK)
+        if self.showVideo and frameOK and self.curCam == 1:
+            # convert colors from BGR to RGBA
+            cv2image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGBA)
+            cv2image = imutils.resize(cv2image, height=720)
+
+            # convert image for tkinter
+            imgtk = ImageTk.PhotoImage(image=Image.fromarray(cv2image))
+            self.panel.config(image=imgtk)  # show the image
+            self.panel.imgtk = imgtk  # anchor imgtk so it does not be deleted by garbage-collector
+            
+        # call the same function after {self.loopInterval} milliseconds
+        self.root.after(self.loopInterval, self.videoLoopUSB)
 
 
     def toggleRecordUSB(self):
@@ -245,19 +243,7 @@ class Application:
             time.sleep(0.5)
 
         self.recordingLock = False            
-        # elif cam==1: 
-        #     self.recording1 = not self.recording1
-        #     if (not self.recording1): # Stop recording cam 1
-        #         self.out1.release()
-        #         self.end_time1 = time.time()
-        #         self.recordAVMergeInfo(self.out1FileName, self.frame_counts1, self.start_time1, self.end_time1, 0)
-        #         self.frame_counts1 = 1
-        #     else: # Start recording cam 1
-        #         print("Now recording cam 1")
-        #         self.start_time1 = time.time()
-        #         self.out1FileName = "./DASH1-Video/"+datetimeStamp+".avi"
-        #         self.out1 = cv2.VideoWriter(self.out1FileName, self.fourcc, 10, (640, 480))
-        #         time.sleep(0.5)
+
 
     def toggleRecordPiCam(self):
         self.recordingPiCam = not self.recordingPiCam
