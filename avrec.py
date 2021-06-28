@@ -60,7 +60,7 @@ class AudioRecorder():
         self.startTime = 0
         self.endTime = 0
         self.duration = 0
-        self.format = pyaudio.paInt16
+        self.format = 8   # pyaudio.paInt16
         self.audio_filename = filename+".wav"
         self.audio = pyaudio.PyAudio()
         self.stream = self.audio.open(format=self.format,
