@@ -333,6 +333,10 @@ class Application:
                 self.enableShowLabel.config(text="SHOWING" if self.showVideo else "")
 
                 if self.showVideo:
+                    cmIndex += 1
+                    if cmIndex > cmLength:
+                        cmIndex = 0
+                else:
                     if cmLength == cmIndex:
                         im = Image.open('./gabby1.jpg')
                         im = im.resize((640, 480))
@@ -341,11 +345,6 @@ class Application:
                         self.panel.config(image=img, bg="black")
                     else:   
                         self.panel.config(image='', bg="black", fg="white", font=('Helvetica', 30), text=makeLineBreaks(cuteMessages[cmIndex],30))
-
-                    cmIndex += 1
-                    if cmIndex > cmLength:
-                        cmIndex = 0
-                else:
                     self.picam.stop_preview()
 
             if (GPIO.input(TOGGLE_SHOW_PIN) == GPIO.HIGH) == (self.curCam == 1):
