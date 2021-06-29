@@ -260,19 +260,23 @@ class Application:
 
                 if self.showVideo:
                     self.handlePiCamera()
-                    cmIndex += 1
-                    if cmIndex > cmLength:
-                        cmIndex = 0
+     
                 else:
-                    if cmLength == cmIndex:
-                        im = Image.open('./gabby1.jpg')
-                        im = im.resize((1280, 720))
-                        im = im.rotate(280)
+                    try:
+                        self.picam.stop_preview()
+                    except:
+                        print("No preview to stop")
+
+                    cuteMessage = cuteMessages[cmIndex]
+                    if cuteMessage[0:4] == "img_":
+                        im = Image.open(cuteMessage[4:])
+                        im = im.resize((900, 600))
+                        im = im.rotate(300)
                         img = ImageTk.PhotoImage(im)
                         self.panel.config(image=img, bg="black")
                     else:   
                         self.panel.config(image='', bg="black", fg="white", font=('Helvetica', 30), text=makeLineBreaks(cuteMessages[cmIndex],30))
-                    self.picam.stop_preview()
+
 
             if (GPIO.input(TOGGLE_SHOW_PIN) == GPIO.HIGH) == (self.curCam == 1):
                 print("RECORD FRONT CHANGED: ",self.curCam)
@@ -285,11 +289,11 @@ class Application:
         if self.curCam == 0 and self.showVideo:
             self.picamThread = threading.Thread(target=self.startPiCameraPreview, args=())
             self.picamThread.start()
-        elif self.curCam == 1:
-            try:
-                self.picam.stop_preview()
-            except:
-                print("Can't stop preview")
+        # elif self.curCam == 1:
+        #     try:
+        #         self.picam.stop_preview()
+        #     except:
+        #         print("Can't stop preview")
 
     def startPiCameraPreview(self):
         self.picam.start_preview(fullscreen=False, window=(-20, 30, 1330, 690))
