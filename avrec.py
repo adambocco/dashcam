@@ -113,16 +113,16 @@ class Application:
         self.botQuit = tk.Button(self.root, font=BUTTON_FONT, text="EXIT", bg="#ffafaf", activebackground=BUTTON_ACTIVE_BG,height=BTN_HEIGHT, command=self.destructor)
         self.botQuit.grid(row=0, column=0)
 
-        self.recordingLabelUSB = tk.Label(self.root, bg="black", fg="white", font=LABEL_FONT, text="REC FRONT" if GPIO.input(RECORD_FRONT_PIN)==GPIO.HIGH else "")
+        self.recordingLabelUSB = tk.Label(self.root, bg="black", fg="white", font=LABEL_FONT)
         self.recordingLabelUSB.grid(row=0, column=1)
 
-        self.recordingLabelPiCam = tk.Label(self.root, bg="black", fg="white", font=LABEL_FONT, text="REC REAR" if GPIO.input(RECORD_REAR_PIN)==GPIO.HIGH else "")
+        self.recordingLabelPiCam = tk.Label(self.root, bg="black", fg="white", font=LABEL_FONT)
         self.recordingLabelPiCam.grid(row=0, column=2)
 
-        self.enableShowLabel = tk.Label(self.root, bg="black", fg="white", font=LABEL_FONT, text="SHOWING" if GPIO.input(ENABLE_SHOW_PIN)==GPIO.HIGH else "")
+        self.enableShowLabel = tk.Label(self.root, bg="black", fg="white", font=LABEL_FONT)
         self.enableShowLabel.grid(row=0, column=3)
 
-        self.toggleShowLabel = tk.Label(self.root, bg="black", fg="white", font=LABEL_FONT, text="REAR" if GPIO.input(TOGGLE_SHOW_PIN)==GPIO.HIGH else "FRONT")
+        self.toggleShowLabel = tk.Label(self.root, bg="black", fg="white", font=LABEL_FONT)
         self.toggleShowLabel.grid(row=0, column=4)
 
         self.gpioThread = threading.Thread(target=self.handleToggleSwitches, args=())
@@ -236,12 +236,7 @@ class Application:
 
 
     def handleToggleSwitches(self):
-        GPIO.setmode(GPIO.BCM)
-        GPIO.setup(RECORD_FRONT_PIN, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
-        GPIO.setup(RECORD_REAR_PIN, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
-        GPIO.setup(ENABLE_SHOW_PIN, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
-        GPIO.setup(TOGGLE_SHOW_PIN, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
-        GPIO.setup(OTHER_PIN, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+        setupGPIO()
 
         from messages import cuteMessages
         cmLength = len(cuteMessages)
