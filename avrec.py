@@ -105,7 +105,7 @@ class Application:
         self.root.config(bg=BG)
 
         self.panel = tk.Label(self.root, bg=BG)  # initialize image panel
-        self.panel.grid(row=1, column=0, columnspan=6)
+        self.panel.grid(row=1, column=0, columnspan=6, padx=5)
 
         self.recordingLock = False
         self.readGPIO = True
