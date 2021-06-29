@@ -17,7 +17,10 @@ import imutils
 from datetime import datetime
 import RPi.GPIO as GPIO
 
+from audioRecorder import AudioRecorder
+
 MAIN_WINDOW_GEOMETRY = '1280x720'
+DATE_FORMAT = "%d-%m-%Y-%H-%M"
 
 BG = "black"
 BUTTON_BG = "#eeffee"
@@ -32,13 +35,14 @@ ENABLE_SHOW_PIN = 22
 TOGGLE_SHOW_PIN = 23
 OTHER_PIN = 24
 
-GPIO.setwarnings(False)
-GPIO.setmode(GPIO.BCM)
-GPIO.setup(RECORD_FRONT_PIN, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
-GPIO.setup(RECORD_REAR_PIN, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
-GPIO.setup(ENABLE_SHOW_PIN, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
-GPIO.setup(TOGGLE_SHOW_PIN, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
-GPIO.setup(OTHER_PIN, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+def setupGPIO():
+    GPIO.setwarnings(False)
+    GPIO.setmode(GPIO.BCM)
+    GPIO.setup(RECORD_FRONT_PIN, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+    GPIO.setup(RECORD_REAR_PIN, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+    GPIO.setup(ENABLE_SHOW_PIN, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+    GPIO.setup(TOGGLE_SHOW_PIN, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+    GPIO.setup(OTHER_PIN, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
 
 
 
@@ -49,66 +53,6 @@ if not os.path.exists('/dev/video0'):
     p = subprocess.Popen(rpistr, shell=True, preexec_fn=os.setsid)
     time.sleep(1)
 
-class AudioRecorder():
-
-    # Audio class based on pyAudio and Wave
-    def __init__(self, filename):
-        self.open = True
-        self.rate = 44100
-        self.frames_per_buffer = 1024
-        self.channels = 2
-        self.startTime = 0
-        self.endTime = 0
-        self.duration = 0
-        self.format = 8
-        self.audio_filename = filename+".wav"
-        self.audio = PyAudio()
-        self.stream = self.audio.open(format=self.format,
-                                      channels=self.channels,
-                                      rate=self.rate,
-                                      input=True,
-                                      frames_per_buffer=self.frames_per_buffer)
-        self.audio_frames = []
-
-    # Audio starts being recorded in separate thread
-
-    def record(self):
-
-        self.stream.start_stream()
-        while(self.open == True):
-            data = self.stream.read(self.frames_per_buffer)
-            self.audio_frames.append(data)
-            if self.open == False:
-                break
-
-    # Finishes the audio recording therefore the thread too
-
-    def stop(self):
-
-        if self.open == True:
-            self.open = False
-            time.sleep(0.5)
-            self.stream.stop_stream()
-            self.stream.close()
-            self.audio.terminate()
-            self.endTime = time.time()
-            self.duration = self.endTime - self.startTime
-            time.sleep(0.5)
-            waveFile = wave.open(self.audio_filename, 'wb')
-            waveFile.setnchannels(self.channels)
-            waveFile.setsampwidth(self.audio.get_sample_size(self.format))
-            waveFile.setframerate(self.rate)
-            waveFile.writeframes(b''.join(self.audio_frames)) # Audio write out at this point
-            waveFile.close()
-        time.sleep(0.5)
-        return self.duration
-
-    # Launches the audio recording function using a thread
-    def start(self):
-        self.startTime = time.time()
-        self.open = True
-        self.audio_thread = threading.Thread(target=self.record)
-        self.audio_thread.start()
 
 
 class Application:
@@ -181,8 +125,8 @@ class Application:
         self.toggleShowLabel = tk.Label(self.root, bg="black", fg="white", font=LABEL_FONT, text="REAR" if GPIO.input(TOGGLE_SHOW_PIN)==GPIO.HIGH else "FRONT")
         self.toggleShowLabel.grid(row=0, column=4)
 
-        # self.threadUSB = threading.Thread(target=self.videoLoopUSB, args=())
-        # self.threadUSB.start()
+        self.gpioThread = threading.Thread(target=self.handleToggleSwitches, args=())
+        self.gpioThread.start()
 
         self.root.after(self.loopInterval, self.videoLoopUSB)
         
@@ -205,17 +149,13 @@ class Application:
                 self.frameCountsUSB += 1
                 self.outUSB.write(frame)
 
-        # print("CURCAM: ",self.curCam)
-        # print("Show Video: ",self.showVideo)
-        # print("FrameOK: ", frameOK)
         if self.showVideo and frameOK and self.curCam == 1:
-            # convert colors from BGR to RGBA
+
             cv2image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGBA)
             cv2image = imutils.resize(cv2image, height=700)
 
-            # convert image for tkinter
             imgtk = ImageTk.PhotoImage(image=Image.fromarray(cv2image))
-            self.panel.config(image=imgtk)  # show the image
+            self.panel.config(image=imgtk) 
             self.panel.imgtk = imgtk  # anchor imgtk so it does not be deleted by garbage-collector
             
         # call the same function after {self.loopInterval} milliseconds
@@ -223,11 +163,10 @@ class Application:
 
 
     def toggleRecordUSB(self):
-        datetimeStamp = datetime.now().strftime("%d-%m-%Y-%H-%M")
         self.recordingLock = True
 
         self.recordingUSB = not self.recordingUSB
-        if (not self.recordingUSB): # Stop recording cam 0
+        if not self.recordingUSB: # Stop recording cam 0
             audioDuration = self.audio_thread.stop()
             time.sleep(1)
             self.endTimeUSB = time.time()
@@ -236,6 +175,7 @@ class Application:
             self.frameCountsUSB = 1
             
         else: # Start recording cam 0
+            datetimeStamp = datetime.now().strftime(DATE_FORMAT)
             self.start_audio_recording("./DASH0-Audio/"+datetimeStamp)
             self.startTimeUSB = time.time()
             self.outFileNameUSB = "./DASH0-Video/"+datetimeStamp+".avi"
@@ -249,12 +189,11 @@ class Application:
         self.recordingPiCam = not self.recordingPiCam
 
         if self.recordingPiCam:
-            datetimeStamp = datetime.now().strftime("%d-%m-%Y-%H-%M")
+            datetimeStamp = datetime.now().strftime(DATE_FORMAT)
             self.outFileNamePiCam = "/home/pi/Desktop/dashcam/DASH1-Video/"+datetimeStamp+".h264"
             self.picam.start_recording(self.outFileNamePiCam)
         else:
             self.picam.stop_recording()
-
 
 
     def recordAVMergeInfo(self, filename, framecount, start, end, audioDuration):
@@ -265,10 +204,10 @@ class Application:
 
 
     def destructor(self):
+        self.readGPIO = False
+        
         try:
-            self.readGPIO = False
-            
-            if (self.recordingUSB): # Stop recording cam 0
+            if self.recordingUSB: # Stop recording cam 0
                 self.recordingUSB = False
                 audioDuration = self.audio_thread.stop()
                 self.endTimeUSB = time.time()
@@ -280,12 +219,6 @@ class Application:
                 self.recordAVMergeInfo(self.outFileNameUSB, self.frameCountsUSB, self.startTimeUSB, self.endTimeUSB, audioDuration)
             if (self.recordingPiCam): # Stop recording cam 1
                 self.picam.stop_recording()
-
-            try:
-                self.audio_thread.stop()
-
-            except (NameError, AttributeError) as e:
-                print("No audio thread started")
             
             GPIO.cleanup()
             self.root.destroy()
@@ -397,7 +330,5 @@ def makeLineBreaks(stringToBreak, breakIndex):
 
 if __name__ == "__main__":
     pba = Application()
-    gpioThread = threading.Thread(target=pba.handleToggleSwitches, args=())
-    gpioThread.start()
     pba.root.mainloop()
     exit()
