@@ -269,7 +269,7 @@ class Application:
 
                     cuteMessage = cuteMessages[cmIndex]
                     if cuteMessage[0:4] == "img_":
-                        im = Image.open(cuteMessage[4:])
+                        im = Image.open("/home/pi/Desktop/dashcam/images/"+cuteMessage[4:])
                         im = im.resize((900, 600))
                         im = im.rotate(300)
                         img = ImageTk.PhotoImage(im)
