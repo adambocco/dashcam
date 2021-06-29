@@ -1,6 +1,4 @@
 import cv2
-from pyaudio import PyAudio
-import wave
 import threading
 import time
 import subprocess
