@@ -275,8 +275,11 @@ class Application:
                         img = ImageTk.PhotoImage(im)
                         self.panel.config(image=img, bg="black")
                     else:   
-                        self.panel.config(image='', bg="black", fg="white", font=('Helvetica', 30), text=makeLineBreaks(cuteMessages[cmIndex],30))
+                        self.panel.config(image='', bg="black", fg="white", font=('Helvetica', 30), text=makeLineBreaks("\n\n" +cuteMessages[cmIndex],30))
 
+                    cmIndex += 1
+                    if cmIndex >= len(cuteMessages):
+                        cmIndex = 0
 
             if (GPIO.input(TOGGLE_SHOW_PIN) == GPIO.HIGH) == (self.curCam == 1):
                 print("RECORD FRONT CHANGED: ",self.curCam)
