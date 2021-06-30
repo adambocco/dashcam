@@ -284,19 +284,20 @@ class Application:
             if (GPIO.input(TOGGLE_SHOW_PIN) == GPIO.HIGH) == (self.curCam == 1):
                 print("RECORD FRONT CHANGED: ",self.curCam)
                 self.curCam = 0 if self.curCam == 1 else 1
-                self.handlePiCamera()
+                if self.showVideo:
+                    self.handlePiCamera()
 
                 self.toggleShowLabel.config(text="REAR" if self.curCam == 1 else "FRONT")
 
     def handlePiCamera(self):
-        if self.curCam == 0 and self.showVideo:
+        if self.curCam == 0:
             self.picamThread = threading.Thread(target=self.startPiCameraPreview, args=())
             self.picamThread.start()
-        # elif self.curCam == 1:
-        #     try:
-        #         self.picam.stop_preview()
-        #     except:
-        #         print("Can't stop preview")
+        elif self.curCam == 1:
+            try:
+                self.picam.stop_preview()
+            except:
+                print("Can't stop preview")
 
     def startPiCameraPreview(self):
         self.picam.start_preview(fullscreen=False, window=(-20, 30, 1330, 690))
