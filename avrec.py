@@ -117,11 +117,8 @@ class Application:
         self.recordingLabelPiCam = tk.Label(self.root, bg="black", fg="white", font=LABEL_FONT)
         self.recordingLabelPiCam.grid(row=0, column=2)
 
-        self.enableShowLabel = tk.Label(self.root, bg="black", fg="white", font=LABEL_FONT)
-        self.enableShowLabel.grid(row=0, column=3)
-
         self.toggleShowLabel = tk.Label(self.root, bg="black", fg="white", font=LABEL_FONT)
-        self.toggleShowLabel.grid(row=0, column=4)
+        self.toggleShowLabel.grid(row=0, column=3)
 
         self.gpioThread = threading.Thread(target=self.handleToggleSwitches, args=())
         self.gpioThread.start()
@@ -255,8 +252,7 @@ class Application:
             if (GPIO.input(ENABLE_SHOW_PIN) == GPIO.LOW) == self.showVideo:
                 print("SHOW VIDEO: ",self.showVideo)
                 self.showVideo = not self.showVideo
-
-                self.enableShowLabel.config(text="SHOWING" if self.showVideo else "")
+                self.handleShowText()
 
                 if self.showVideo:
                     self.handlePiCamera()
@@ -287,13 +283,20 @@ class Application:
                 if self.showVideo:
                     self.handlePiCamera()
 
-                toggleShowText = ""
-                if self.showVideo:
-                    if self.curCam == 0:
-                        toggleShowText = "REAR"
-                    else:
-                        toggleShowText = "FRONT"
-                self.toggleShowLabel.config(text=toggleShowText)
+                self.handleShowText()
+
+    def handleShowText(self):
+        toggleShowText = ""
+
+        if self.showVideo:
+            toggleShowText = "SHOWING"
+            if self.curCam == 0:
+                toggleShowText += "REAR"
+            else:
+                toggleShowText += "FRONT"
+        self.toggleShowLabel.config(text=toggleShowText)
+
+
 
     def handlePiCamera(self):
         if self.curCam == 0:
