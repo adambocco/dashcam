@@ -270,8 +270,8 @@ class Application:
                     cuteMessage = cuteMessages[cmIndex]
                     if cuteMessage[0:4] == "img_":
                         im = Image.open("/home/pi/Desktop/dashcam/images/"+cuteMessage[4:])
-                        im = im.resize((900, 600))
-                        im = im.rotate(300)
+                        im = im.resize((800, 600))
+                        im = im.rotate(270)
                         img = ImageTk.PhotoImage(im)
                         self.panel.config(image=img, bg="black")
                     else:   
@@ -287,7 +287,13 @@ class Application:
                 if self.showVideo:
                     self.handlePiCamera()
 
-                self.toggleShowLabel.config(text="REAR" if self.curCam == 1 else "FRONT")
+                toggleShowText = ""
+                if self.showVideo:
+                    if self.curCam == 0:
+                        toggleShowText = "REAR"
+                    else:
+                        toggleShowText = "FRONT"
+                self.toggleShowLabel.config(text=toggleShowText)
 
     def handlePiCamera(self):
         if self.curCam == 0:
