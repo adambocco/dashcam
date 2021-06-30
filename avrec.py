@@ -148,7 +148,7 @@ class Application:
                 self.outUSB.write(frame)
 
         if self.showVideo and frameOK and self.curCam == 1:
-
+            print("ShowingUSB")
             cv2image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGBA)
             cv2image = imutils.resize(cv2image, height=700)
 
