@@ -54,7 +54,7 @@ if not os.path.exists('/dev/video0'):
 
 
 class Application:
-    def __init__(self, output_path="./"):
+    def __init__(self):
         # Variables set to none are initialized in toggleRecord()
         camindices = find_camera_indices()
         self.camIndexUSB = camindices[0]
@@ -112,10 +112,10 @@ class Application:
         self.botQuit.grid(row=0, column=0)
 
         self.recordingLabelUSB = tk.Label(self.root, bg="black", fg="white", font=LABEL_FONT)
-        self.recordingLabelUSB.grid(row=0, column=1)
+        self.recordingLabelUSB.grid(row=0, column=1, pady=2)
 
         self.recordingLabelPiCam = tk.Label(self.root, bg="black", fg="white", font=LABEL_FONT)
-        self.recordingLabelPiCam.grid(row=0, column=2)
+        self.recordingLabelPiCam.grid(row=0, column=2, pady=2)
 
         self.toggleShowLabel = tk.Label(self.root, bg="black", fg="white", font=LABEL_FONT)
         self.toggleShowLabel.grid(row=0, column=3)
@@ -170,9 +170,9 @@ class Application:
             
         else: # Start recording cam 0
             datetimeStamp = datetime.now().strftime(DATE_FORMAT)
-            self.start_audio_recording("./DASH0-Audio/"+datetimeStamp)
+            self.start_audio_recording("/home/pi/Desktop/dashcam/DASH0-Audio/"+datetimeStamp)
             self.startTimeUSB = time.time()
-            self.outFileNameUSB = "./DASH0-Video/"+datetimeStamp+".avi"
+            self.outFileNameUSB = "/home/pi/Desktop/dashcam/DASH0-Video/"+datetimeStamp+".avi"
             self.outUSB = cv2.VideoWriter(self.outFileNameUSB, self.fourcc, 10, (640, 480))
             time.sleep(0.5)
 
