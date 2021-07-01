@@ -240,13 +240,17 @@ class Application:
             if (GPIO.input(RECORD_FRONT_PIN) == GPIO.LOW) == self.recordingUSB:
                 print("RECORD FRONT CHANGED: ",self.recordingUSB)
                 self.toggleRecordUSB()
-                self.recordingLabelUSB.config(image="/home/pi/Desktop/dashcam/images/recFront.jpg" if self.recordingUSB else "")
+                im = Image.open("/home/pi/Desktop/dashcam/images/recFront.jpg")
+                img = ImageTk.PhotoImage(im)
+                self.recordingLabelUSB.config(image=img if self.recordingUSB else "")
 
 
             if (GPIO.input(RECORD_REAR_PIN) == GPIO.LOW) == self.recordingPiCam:
                 print("RECORD REAR CHANGED: ",self.recordingPiCam)
                 self.toggleRecordPiCam()
-                self.recordingLabelPiCam.config(image="/home/pi/Desktop/dashcam/images/recRear.jpg" if self.recordingPiCam else "")
+                im = Image.open("/home/pi/Desktop/dashcam/images/recRear.jpg")
+                img = ImageTk.PhotoImage(im)
+                self.recordingLabelPiCam.config(image=img if self.recordingPiCam else "")
 
             if (GPIO.input(ENABLE_SHOW_PIN) == GPIO.LOW) == self.showVideo:
                 print("SHOW VIDEO: ",self.showVideo)
