@@ -118,7 +118,7 @@ class Application:
         self.recordingLabelPiCam.grid(row=0, column=2, pady=2)
 
         self.toggleShowLabel = tk.Label(self.root, bg="black", fg="white")
-        self.toggleShowLabel.grid(row=0, column=3)
+        self.toggleShowLabel.grid(row=0, column=3, pady=2)
 
         self.gpioThread = threading.Thread(target=self.handleToggleSwitches, args=())
         self.gpioThread.start()
@@ -298,9 +298,14 @@ class Application:
                 toggleShowImage += "showingFront.jpg"
             im3 = Image.open(toggleShowImage)
             img3 = ImageTk.PhotoImage(im3)
+
+            
             self.toggleShowLabel.config(image=img3)
+            print("SHOWING IMAGE!!")
         else:
-            self.toggleShowLabel.config(image="")
+            self.toggleShowLabel.config(image='')
+            print("NOT SHOWING IMAGE!!")
+        
 
 
     def handlePiCamera(self):
