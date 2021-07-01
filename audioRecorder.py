@@ -2,6 +2,7 @@ from pyaudio import PyAudio
 import wave
 import threading
 import time
+
 class AudioRecorder():
 
     # Audio class based on pyAudio and Wave
