@@ -241,7 +241,7 @@ class Application:
                 print("RECORD FRONT CHANGED: ",self.recordingUSB)
                 self.toggleRecordUSB()
                 im1 = Image.open("/home/pi/Desktop/dashcam/images/recFront.jpg")
-                img1 = ImageTk.PhotoImage(im)
+                img1 = ImageTk.PhotoImage(im1)
                 self.recordingLabelUSB.config(image=img1 if self.recordingUSB else "")
 
 
@@ -249,7 +249,7 @@ class Application:
                 print("RECORD REAR CHANGED: ",self.recordingPiCam)
                 self.toggleRecordPiCam()
                 im2 = Image.open("/home/pi/Desktop/dashcam/images/recRear.jpg")
-                img2 = ImageTk.PhotoImage(im)
+                img2 = ImageTk.PhotoImage(im2)
                 self.recordingLabelPiCam.config(image=img2 if self.recordingPiCam else "")
 
             if (GPIO.input(ENABLE_SHOW_PIN) == GPIO.LOW) == self.showVideo:
