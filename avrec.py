@@ -305,6 +305,7 @@ class Application:
         else:
             self.toggleShowLabel.config(image='')
             print("NOT SHOWING IMAGE!!")
+        self.root.update()
         
 
 
