@@ -111,13 +111,13 @@ class Application:
         self.botQuit = tk.Button(self.root, font=BUTTON_FONT, text="EXIT", bg="#ffafaf", activebackground=BUTTON_ACTIVE_BG,height=BTN_HEIGHT, command=self.destructor)
         self.botQuit.grid(row=0, column=0)
 
-        self.recordingLabelUSB = tk.Label(self.root, bg="black", fg="white", font=LABEL_FONT)
+        self.recordingLabelUSB = tk.Label(self.root, bg="black", fg="white")
         self.recordingLabelUSB.grid(row=0, column=1, pady=2)
 
-        self.recordingLabelPiCam = tk.Label(self.root, bg="black", fg="white", font=LABEL_FONT)
+        self.recordingLabelPiCam = tk.Label(self.root, bg="black", fg="white")
         self.recordingLabelPiCam.grid(row=0, column=2, pady=2)
 
-        self.toggleShowLabel = tk.Label(self.root, bg="black", fg="white", font=LABEL_FONT)
+        self.toggleShowLabel = tk.Label(self.root, bg="black", fg="white")
         self.toggleShowLabel.grid(row=0, column=3)
 
         self.gpioThread = threading.Thread(target=self.handleToggleSwitches, args=())
@@ -289,16 +289,19 @@ class Application:
                 self.handleShowText()
 
     def handleShowText(self):
-        toggleShowText = ""
+        toggleShowImage = ""
 
         if self.showVideo:
-            toggleShowText = "SHOWING"
+            toggleShowImage = "/home/pi/Desktop/dashcam/images/"
             if self.curCam == 0:
-                toggleShowText += " REAR"
+                toggleShowImage += "showingRear.jpg"
             else:
-                toggleShowText += " FRONT"
-        self.toggleShowLabel.config(text=toggleShowText)
-
+                toggleShowImage += "showingFront.jpg"
+            im3 = Image.open(toggleShowImage)
+            img3 = ImageTk.PhotoImage(im3)
+            self.toggleShowLabel.config(image=img3)
+        else:
+            self.toggleShowLabel.config(image="")
 
 
     def handlePiCamera(self):
@@ -342,7 +345,7 @@ def makeLineBreaks(stringToBreak, breakIndex):
     
 
 if __name__ == "__main__":
-    time.sleep(5)
+    time.sleep(3)
     pba = Application()
     pba.root.mainloop()
     exit()
