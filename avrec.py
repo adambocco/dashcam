@@ -289,7 +289,6 @@ class Application:
                 self.handleShowText()
 
     def handleShowText(self):
-        toggleShowImage = ""
 
         if self.showVideo:
             toggleShowImage = "/home/pi/Desktop/dashcam/images/"
