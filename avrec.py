@@ -342,6 +342,7 @@ def makeLineBreaks(stringToBreak, breakIndex):
     
 
 if __name__ == "__main__":
+    time.sleep(5)
     pba = Application()
     pba.root.mainloop()
     exit()
