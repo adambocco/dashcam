@@ -57,10 +57,11 @@ class Application:
     def __init__(self):
         # Variables set to none are initialized in toggleRecord()
         camindices = find_camera_indices()
+        self.initImages()
         self.camIndexUSB = camindices[0]
 
         self.picam = PiCamera()
-        self.showVideo = True # Stop rendering in tkinter to improve recording performance
+        self.showVideo = False # Stop rendering in tkinter to improve recording performance
 
         self.recordingPiCam = False
         self.recordingUSB = False
@@ -124,7 +125,14 @@ class Application:
         self.gpioThread.start()
 
         self.root.after(self.loopInterval, self.videoLoopUSB)
+
         
+    def initImages(self):
+        self.showingFrontImg = ImageTk.PhotoImage(Image.open("/home/pi/Desktop/dashcam/images/showingFront.jpg"))
+        self.showingRearImg = ImageTk.PhotoImage(Image.open("/home/pi/Desktop/dashcam/images/showingRear.jpg"))
+        self.recordingFrontImg = ImageTk.PhotoImage(Image.open("/home/pi/Desktop/dashcam/images/recFront.jpg"))
+        self.recordingRearImg = ImageTk.PhotoImage(Image.open("/home/pi/Desktop/dashcam/images/recRear.jpg"))
+
     def toggleFullScreen(self, event):
         self.fullScreenState = not self.fullScreenState
         self.root.attributes("-fullscreen", self.fullScreenState)
@@ -240,17 +248,13 @@ class Application:
             if (GPIO.input(RECORD_FRONT_PIN) == GPIO.LOW) == self.recordingUSB:
                 print("RECORD FRONT CHANGED: ",self.recordingUSB)
                 self.toggleRecordUSB()
-                im1 = Image.open("/home/pi/Desktop/dashcam/images/recFront.jpg")
-                img1 = ImageTk.PhotoImage(im1)
-                self.recordingLabelUSB.config(image=img1 if self.recordingUSB else "")
+                self.recordingLabelUSB.config(image=self.recordingFrontImg if self.recordingUSB else "")
 
 
             if (GPIO.input(RECORD_REAR_PIN) == GPIO.LOW) == self.recordingPiCam:
                 print("RECORD REAR CHANGED: ",self.recordingPiCam)
                 self.toggleRecordPiCam()
-                im2 = Image.open("/home/pi/Desktop/dashcam/images/recRear.jpg")
-                img2 = ImageTk.PhotoImage(im2)
-                self.recordingLabelPiCam.config(image=img2 if self.recordingPiCam else "")
+                self.recordingLabelPiCam.config(image=self.recordingRearImg if self.recordingPiCam else "")
 
             if (GPIO.input(ENABLE_SHOW_PIN) == GPIO.LOW) == self.showVideo:
                 print("SHOW VIDEO: ",self.showVideo)
@@ -289,23 +293,10 @@ class Application:
                 self.handleShowText()
 
     def handleShowText(self):
-
         if self.showVideo:
-            toggleShowImage = "/home/pi/Desktop/dashcam/images/"
-            if self.curCam == 0:
-                toggleShowImage += "showingRear.jpg"
-            else:
-                toggleShowImage += "showingFront.jpg"
-            im3 = Image.open(toggleShowImage)
-            img3 = ImageTk.PhotoImage(im3)
-
-            
-            self.toggleShowLabel.config(image=img3)
-            print("SHOWING IMAGE!!")
+            self.toggleShowLabel.config(image=self.showingFrontImg if self.curCam == 1 else self.showingRearImg)
         else:
             self.toggleShowLabel.config(image='')
-            print("NOT SHOWING IMAGE!!")
-        self.root.update()
         
 
 
