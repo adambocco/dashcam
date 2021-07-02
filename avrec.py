@@ -120,10 +120,11 @@ class Application:
         self.toggleShowLabel = tk.Label(self.root, bg="black", fg="white")
         self.toggleShowLabel.grid(row=0, column=3, pady=2)
 
+        self.initImages()
+
         self.gpioThread = threading.Thread(target=self.handleToggleSwitches, args=())
         self.gpioThread.start()
 
-        self.initImages()
         self.root.after(self.loopInterval, self.videoLoopUSB)
 
         
