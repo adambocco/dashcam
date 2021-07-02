@@ -57,7 +57,6 @@ class Application:
     def __init__(self):
         # Variables set to none are initialized in toggleRecord()
         camindices = find_camera_indices()
-        self.initImages()
         self.camIndexUSB = camindices[0]
 
         self.picam = PiCamera()
@@ -124,6 +123,7 @@ class Application:
         self.gpioThread = threading.Thread(target=self.handleToggleSwitches, args=())
         self.gpioThread.start()
 
+        self.initImages()
         self.root.after(self.loopInterval, self.videoLoopUSB)
 
         
