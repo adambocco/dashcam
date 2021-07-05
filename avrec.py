@@ -33,6 +33,16 @@ ENABLE_SHOW_PIN = 22
 TOGGLE_SHOW_PIN = 23
 OTHER_PIN = 24
 
+def find_camera_indices():
+    valid_cams = []
+    for i in range(8):
+        cap = cv2.VideoCapture(i)
+        if cap is None or not cap.isOpened():
+            pass
+        else:
+            valid_cams.append(i)
+    return valid_cams
+
 camindices = find_camera_indices()
 
 def setupGPIO():
@@ -316,15 +326,6 @@ class Application:
         self.picam.start_preview(fullscreen=False, window=(-20, 30, 1330, 690))
     
 
-def find_camera_indices():
-    valid_cams = []
-    for i in range(8):
-        cap = cv2.VideoCapture(i)
-        if cap is None or not cap.isOpened():
-            pass
-        else:
-            valid_cams.append(i)
-    return valid_cams
     
 
 def makeLineBreaks(stringToBreak, breakIndex):
