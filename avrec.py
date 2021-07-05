@@ -33,6 +33,8 @@ ENABLE_SHOW_PIN = 22
 TOGGLE_SHOW_PIN = 23
 OTHER_PIN = 24
 
+camindices = find_camera_indices()
+
 def setupGPIO():
     GPIO.setwarnings(False)
     GPIO.setmode(GPIO.BCM)
@@ -56,7 +58,6 @@ if not os.path.exists('/dev/video0'):
 class Application:
     def __init__(self):
         # Variables set to none are initialized in toggleRecord()
-        camindices = find_camera_indices()
         self.camIndexUSB = camindices[0]
 
         self.picam = PiCamera()
