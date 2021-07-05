@@ -33,7 +33,6 @@ ENABLE_SHOW_PIN = 22
 TOGGLE_SHOW_PIN = 23
 OTHER_PIN = 24
 
-
 def setupGPIO():
     GPIO.setwarnings(False)
     GPIO.setmode(GPIO.BCM)
@@ -52,17 +51,7 @@ if not os.path.exists('/dev/video0'):
     p = subprocess.Popen(rpistr, shell=True, preexec_fn=os.setsid)
     time.sleep(1)
 
-def find_camera_indices():
-    valid_cams = []
-    for i in range(8):
-        cap = cv2.VideoCapture(i)
-        if cap is None or not cap.isOpened():
-            pass
-        else:
-            valid_cams.append(i)
-    return valid_cams
 
-camindices = find_camera_indices()
 
 class Application:
     def __init__(self):
@@ -325,6 +314,15 @@ class Application:
         self.picam.start_preview(fullscreen=False, window=(-20, 30, 1330, 690))
     
 
+def find_camera_indices():
+    valid_cams = []
+    for i in range(8):
+        cap = cv2.VideoCapture(i)
+        if cap is None or not cap.isOpened():
+            pass
+        else:
+            valid_cams.append(i)
+    return valid_cams
     
 
 def makeLineBreaks(stringToBreak, breakIndex):
@@ -344,12 +342,13 @@ def makeLineBreaks(stringToBreak, breakIndex):
 
 if __name__ == "__main__":
     time.sleep(5)
+    camindices = find_camera_indices()
     pba = None
-    while pba == None:
+    while pba != None:
         try:
             pba = Application()
         except:
             pass
-    print("PBA: ", pba)
+    
     pba.root.mainloop()
     exit()
