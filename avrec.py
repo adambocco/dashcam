@@ -33,17 +33,6 @@ ENABLE_SHOW_PIN = 22
 TOGGLE_SHOW_PIN = 23
 OTHER_PIN = 24
 
-def find_camera_indices():
-    valid_cams = []
-    for i in range(8):
-        cap = cv2.VideoCapture(i)
-        if cap is None or not cap.isOpened():
-            pass
-        else:
-            valid_cams.append(i)
-    return valid_cams
-
-camindices = find_camera_indices()
 
 def setupGPIO():
     GPIO.setwarnings(False)
@@ -63,7 +52,17 @@ if not os.path.exists('/dev/video0'):
     p = subprocess.Popen(rpistr, shell=True, preexec_fn=os.setsid)
     time.sleep(1)
 
+def find_camera_indices():
+    valid_cams = []
+    for i in range(8):
+        cap = cv2.VideoCapture(i)
+        if cap is None or not cap.isOpened():
+            pass
+        else:
+            valid_cams.append(i)
+    return valid_cams
 
+camindices = find_camera_indices()
 
 class Application:
     def __init__(self):
