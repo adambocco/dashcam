@@ -349,5 +349,6 @@ if __name__ == "__main__":
             pba = Application()
         except:
             pass
+    print("PBA: ", pba)
     pba.root.mainloop()
     exit()
